@@ -21,8 +21,8 @@ export const pageVariants = {
 };
 
 export const pageTransition = {
-  type: "tween",
-  ease: [0.25, 0.1, 0.25, 1],
+  type: "tween" as const,
+  ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
   duration: 0.35,
 };
 
@@ -61,10 +61,11 @@ interface FadeInProps {
   className?: string;
   duration?: number;
   layout?: boolean;
+  id?: string;
 }
 
 export const FadeIn = forwardRef<HTMLDivElement, FadeInProps>(
-  ({ children, delay = 0, direction = "up", className = "", duration = 0.5, layout = false }, ref) => {
+  ({ children, delay = 0, direction = "up", className = "", duration = 0.5, layout = false, id }, ref) => {
     const directions = {
       up: { y: 20 },
       down: { y: -20 },
@@ -76,6 +77,7 @@ export const FadeIn = forwardRef<HTMLDivElement, FadeInProps>(
     return (
       <motion.div
         ref={ref}
+        id={id}
         initial={{
           opacity: 0,
           ...directions[direction],
