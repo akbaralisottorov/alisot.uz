@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import { ArticleRepository } from "./src/repositories/articleRepository.js";
 import { UserRepository } from "./src/repositories/userRepository.js";
 import crypto from "crypto";
@@ -735,7 +734,8 @@ if (!process.env.VERCEL) {
     
     // Vite middleware for development
     if (process.env.NODE_ENV !== "production") {
-      const vite = await createViteServer({
+      const { createServer } = await import("vite");
+      const vite = await createServer({
         server: { middlewareMode: true },
         appType: "spa",
       });
