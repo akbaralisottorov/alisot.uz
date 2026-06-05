@@ -1,0 +1,316 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Serif+Display:ital@0;1&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: 'DM Serif Display', serif;
+    --font-sans: 'DM Sans', sans-serif;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+    --background: #f7f7f4;
+    --foreground: #171717;
+    --card: rgba(255, 255, 255, 0.7);
+    --card-foreground: #171717;
+    --popover: rgba(255, 255, 255, 0.7);
+    --popover-foreground: #171717;
+    --primary: #315f4c;
+    --primary-foreground: #eff7f3;
+    --secondary: rgba(49, 95, 76, 0.06);
+    --secondary-foreground: #171717;
+    --muted: rgba(0, 0, 0, 0.03);
+    --muted-foreground: #525252;
+    --accent: rgba(49, 95, 76, 0.06);
+    --accent-foreground: #315f4c;
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: rgba(49, 95, 76, 0.15);
+    --input: rgba(49, 95, 76, 0.04);
+    --ring: #315f4c;
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --radius: 0.625rem;
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+    --background: #0f1a15;
+    --foreground: #eff7f3;
+    --card: rgba(26, 43, 34, 0.65);
+    --card-foreground: #eff7f3;
+    --popover: rgba(26, 43, 34, 0.65);
+    --popover-foreground: #eff7f3;
+    --primary: #4a8a6a;
+    --primary-foreground: #0f1a15;
+    --secondary: rgba(74, 138, 106, 0.12);
+    --secondary-foreground: #eff7f3;
+    --muted: rgba(255, 255, 255, 0.05);
+    --muted-foreground: #a3a3a3;
+    --accent: rgba(74, 138, 106, 0.12);
+    --accent-foreground: #4a8a6a;
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: rgba(74, 138, 106, 0.2);
+    --input: rgba(255, 255, 255, 0.05);
+    --ring: #4a8a6a;
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground transition-colors duration-300;
+    line-height: 1.65;
+    }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+    }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
+    font-weight: 400;
+  }
+}
+
+/* Cursor Glow Effect */
+.cursor-glow {
+    position: fixed;
+    width: 550px;
+    height: 550px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(49, 95, 76, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+body:hover .cursor-glow { opacity: 1; }
+
+/* Typography styles for article prose (TipTap rendered HTML content) */
+.prose h1 {
+  font-family: var(--font-heading);
+  font-size: 2.25rem;
+  font-weight: 400;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: inherit;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+.prose h2 {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 400;
+  margin-top: 1.85rem;
+  margin-bottom: 0.85rem;
+  color: inherit;
+  line-height: 1.25;
+  letter-spacing: -0.021em;
+}
+.prose h3 {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: inherit;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+.prose p {
+  margin-bottom: 1.25rem;
+  line-height: 1.65;
+}
+.prose ul, .prose ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1.25rem;
+  list-style-position: outside;
+}
+.prose ul {
+  list-style-type: disc;
+}
+.prose ol {
+  list-style-type: decimal;
+}
+.prose li {
+  margin-bottom: 0.5rem;
+}
+.prose blockquote {
+  border-left: 4px solid var(--primary);
+  padding-left: 1.25rem;
+  font-style: italic;
+  margin: 1.5rem 0;
+  opacity: 0.8;
+}
+.prose code {
+  background: var(--input);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.375rem;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+.prose pre {
+  background: var(--input);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  margin-bottom: 1.25rem;
+}
+.prose pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+.prose a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+/* TipTap Editor Placeholders & Custom styles */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--muted-foreground);
+  opacity: 0.45;
+  pointer-events: none;
+  height: 0;
+}
+.tiptap:focus {
+  outline: none;
+}
+.tiptap {
+  border-radius: 0.75rem;
+}
+.tiptap blockquote {
+  border-left: 4px solid var(--primary);
+  padding-left: 1.25rem;
+  font-style: italic;
+  margin: 1.5rem 0;
+  color: var(--muted-foreground);
+}
+
+/* Key Ideas Custom List Styles */
+.key-ideas-ol {
+  counter-reset: key-ideas-counter;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  padding-left: 0;
+  list-style: none;
+  margin: 1.5rem 0;
+}
+
+@media (min-width: 768px) {
+  .key-ideas-ol {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.key-ideas-li {
+  position: relative;
+  counter-increment: key-ideas-counter;
+  background: rgba(49, 95, 76, 0.03);
+  padding: 1.5rem 1.5rem 1.5rem 4rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(49, 95, 76, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.dark .key-ideas-li {
+  background: rgba(74, 138, 106, 0.02);
+  border-color: rgba(74, 138, 106, 0.2);
+}
+
+.key-ideas-li::before {
+  content: counter(key-ideas-counter, decimal-leading-zero);
+  position: absolute;
+  left: 1.25rem;
+  top: 1.25rem;
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary);
+  opacity: 0.15;
+  transition: all 0.3s ease;
+}
+
+.key-ideas-li:hover {
+  border-color: rgba(49, 95, 76, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px -2px rgba(49, 95, 76, 0.08);
+}
+
+.dark .key-ideas-li:hover {
+  border-color: rgba(74, 138, 106, 0.4);
+  box-shadow: 0 4px 20px -2px rgba(74, 138, 106, 0.15);
+}
+
+.key-ideas-li:hover::before {
+  opacity: 0.3;
+  transform: scale(1.1);
+}
