@@ -1,18 +1,18 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { ArticleRepository } from "./src/repositories/articleRepository";
-import { UserRepository } from "./src/repositories/userRepository";
+import { ArticleRepository } from "./src/repositories/articleRepository.js";
+import { UserRepository } from "./src/repositories/userRepository.js";
 import crypto from "crypto";
 import multer from "multer";
 import fs from "fs";
 
 import { Feed } from "feed";
 
-import { BookRepository, BookCategoryRepository } from "./src/repositories/bookRepository";
-import { GardenRepository } from "./src/repositories/gardenRepository";
+import { BookRepository, BookCategoryRepository } from "./src/repositories/bookRepository.js";
+import { GardenRepository } from "./src/repositories/gardenRepository.js";
 
-import { getEmbedding } from "./src/lib/openai";
+import { getEmbedding } from "./src/lib/openai.js";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
