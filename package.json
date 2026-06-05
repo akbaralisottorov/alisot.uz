@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "vercel-build": "prisma generate && tsc && vite build"
+    "vercel-build": "prisma generate && vite build"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
