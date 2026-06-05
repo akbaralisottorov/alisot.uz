@@ -76,7 +76,11 @@ const authMiddleware = (req: any, res: any, next: any) => {
 // Create public/uploads directory if it doesn't exist
 const uploadDir = path.join(process.cwd(), "public/uploads");
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+  try {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  } catch (err) {
+    console.warn("Could not create upload directory (expected in serverless environments):", err);
+  }
 }
 
 // Multer storage configuration
