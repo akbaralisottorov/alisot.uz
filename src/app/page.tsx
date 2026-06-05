@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { FadeIn, StaggerContainer, StaggerItem, HoverCard } from "@/components/animations";
+import SubscribeForm from "@/components/subscribe-form";
+
 
 const SKILLS = [
   "Marketing Strategy",
@@ -175,6 +177,10 @@ export default function Page() {
             ))}
           </StaggerContainer>
         )}
+      </FadeIn>
+
+      <FadeIn delay={0.35} className="md:col-span-12">
+        <SubscribeForm />
       </FadeIn>
 
       <FadeIn delay={0.4}

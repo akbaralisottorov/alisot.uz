@@ -208,6 +208,41 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+app.post("/api/subscribe", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: "Email kiritilishi shart" });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Noto'g'ri email shakli" });
+    }
+
+    const existing = await prisma.subscriber.findUnique({
+      where: { email }
+    });
+
+    if (existing) {
+      return res.status(400).json({ error: "Ushbu email allaqachon ro'yxatdan o'tgan" });
+    }
+
+    const subscriber = await prisma.subscriber.create({
+      data: {
+        email,
+        confirmed: true
+      }
+    });
+
+    return res.json({ success: true, subscriber });
+  } catch (e: any) {
+    console.error("Subscription error:", e);
+    return res.status(500).json({ error: "Obuna bo'lishda xatolik yuz berdi", details: e.message || String(e) });
+  }
+});
+
+
 app.get("/api/articles", async (req, res) => {
   try {
     const articles = await ArticleRepository.getPublishedArticles();
@@ -220,8 +255,19 @@ app.get("/api/articles", async (req, res) => {
 
 app.get("/api/articles/:slug", async (req, res) => {
   try {
-    const article = await ArticleRepository.getArticleBySlug(req.params.slug);
-    if (!article) return res.status(404).json({ error: "Article not found" });
+    const { slug } = req.params;
+    const exists = await prisma.article.findUnique({ where: { slug } });
+    if (!exists) return res.status(404).json({ error: "Article not found" });
+
+    const article = await prisma.article.update({
+      where: { slug },
+      data: { views: { increment: 1 } },
+      include: { 
+        author: true,
+        categories: true,
+        tags: true,
+      }
+    });
     res.json(article);
   } catch (e: any) {
     console.log("Error:", e?.message || e);
@@ -299,6 +345,8 @@ app.get("/sitemap.xml", async (req, res) => {
 app.get("/rss.xml", async (req, res) => {
   try {
     const articles = await ArticleRepository.getPublishedArticles();
+    const books = await BookRepository.getBooks({ status: "COMPLETED" });
+    const notes = await GardenRepository.getNotes({ status: "EVERGREEN" });
     const baseUrl = getAppUrl();
     
     const feed = new Feed({
@@ -306,7 +354,7 @@ app.get("/rss.xml", async (req, res) => {
       description: "Akbarali Sottorov — Marketing strategy va brand communications mutaxassisining portfolio va blog sahifasi.",
       id: baseUrl,
       link: baseUrl,
-      language: "en",
+      language: "uz",
       image: `${baseUrl}/favicon.ico`,
       favicon: `${baseUrl}/favicon.ico`,
       copyright: `All rights reserved ${new Date().getFullYear()}, Akbarali Sottorov`,
@@ -317,8 +365,10 @@ app.get("/rss.xml", async (req, res) => {
       }
     });
 
+    const feedItems: any[] = [];
+
     articles.forEach(article => {
-      feed.addItem({
+      feedItems.push({
         title: article.seoTitle || article.title,
         id: `${baseUrl}/article/${article.slug}`,
         link: `${baseUrl}/article/${article.slug}`,
@@ -326,8 +376,8 @@ app.get("/rss.xml", async (req, res) => {
         content: article.content,
         author: [
           {
-            name: article.author?.name || "Admin",
-            email: article.author?.email || "",
+            name: article.author?.name || "Akbarali Sottorov",
+            email: article.author?.email || "akbaraliy.phone@gmail.com",
             link: baseUrl
           }
         ],
@@ -336,9 +386,54 @@ app.get("/rss.xml", async (req, res) => {
       });
     });
 
+    books.forEach(book => {
+      feedItems.push({
+        title: book.title,
+        id: `${baseUrl}/books/${book.slug}`,
+        link: `${baseUrl}/books/${book.slug}`,
+        description: book.summary || "",
+        content: `Muallif: ${book.author}\n\n${book.summary || ""}\n\n${book.keyIdeas ? `<h3>Asosiy g'oyalar</h3>\n${book.keyIdeas}` : ""}\n\n${book.personalInsights ? `<h3>Shaxsiy fikrlar</h3>\n${book.personalInsights}` : ""}`,
+        author: [
+          {
+            name: "Akbarali Sottorov",
+            email: "akbaraliy.phone@gmail.com",
+            link: baseUrl
+          }
+        ],
+        date: new Date(book.createdAt),
+        image: book.coverImage || undefined
+      });
+    });
+
+    notes.forEach(note => {
+      feedItems.push({
+        title: note.title,
+        id: `${baseUrl}/garden/${note.slug}`,
+        link: `${baseUrl}/garden/${note.slug}`,
+        description: note.content.substring(0, 150) + "...",
+        content: note.content,
+        author: [
+          {
+            name: "Akbarali Sottorov",
+            email: "akbaraliy.phone@gmail.com",
+            link: baseUrl
+          }
+        ],
+        date: new Date(note.createdAt)
+      });
+    });
+
+    // Sort feed items descending by date
+    feedItems.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+    feedItems.forEach(item => {
+      feed.addItem(item);
+    });
+
     res.type("application/xml");
     res.send(feed.rss2());
   } catch (e) {
+    console.error("RSS Feed generation error:", e);
     res.status(500).end();
   }
 });
@@ -423,6 +518,21 @@ app.get("/api/admin/analytics", async (req, res) => {
       orderBy: { createdAt: 'desc' },
     });
 
+    // Most read articles
+    const mostReadArticles = await prisma.article.findMany({
+      where: { status: 'PUBLISHED' },
+      select: { title: true, views: true, createdAt: true },
+      take: 5,
+      orderBy: { views: 'desc' },
+    });
+
+    // Book progress stats
+    const bookStats = {
+      completed: await prisma.book.count({ where: { status: 'COMPLETED' } }),
+      reading: await prisma.book.count({ where: { status: 'READING' } }),
+      wantToRead: await prisma.book.count({ where: { status: 'WANT_TO_READ' } }),
+    };
+
     res.json({
       kpis: {
         totalArticles,
@@ -434,13 +544,55 @@ app.get("/api/admin/analytics", async (req, res) => {
         totalProjects,
         totalUsers
       },
-      recentContent: topContent
+      recentContent: topContent,
+      mostReadArticles,
+      bookStats
     });
   } catch (e: any) {
     console.log("Error fetching analytics:", e?.message || e);
     res.status(500).json({ error: "Failed to fetch real-time analytics" });
   }
 });
+
+// --- Subscriber Routes ---
+app.get("/api/admin/subscribers", async (req, res) => {
+  try {
+    const subscribers = await prisma.subscriber.findMany({
+      orderBy: { createdAt: "desc" }
+    });
+    return res.json(subscribers);
+  } catch (e: any) {
+    console.error("Fetch subscribers error:", e);
+    return res.status(500).json({ error: "Subscribers fetch failed" });
+  }
+});
+
+app.put("/api/admin/subscribers/:id/toggle-confirm", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sub = await prisma.subscriber.findUnique({ where: { id } });
+    if (!sub) return res.status(404).json({ error: "Subscriber not found" });
+    
+    const updated = await prisma.subscriber.update({
+      where: { id },
+      data: { confirmed: !sub.confirmed }
+    });
+    return res.json(updated);
+  } catch (e) {
+    return res.status(500).json({ error: "Failed to update subscriber status" });
+  }
+});
+
+app.delete("/api/admin/subscribers/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.subscriber.delete({ where: { id } });
+    return res.json({ success: true });
+  } catch (e) {
+    return res.status(500).json({ error: "Failed to delete subscriber" });
+  }
+});
+
 
 // --- Book Routes ---
 

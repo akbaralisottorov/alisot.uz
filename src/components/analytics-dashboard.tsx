@@ -157,45 +157,110 @@ export function AnalyticsDashboard() {
           </div>
         </div>
 
-        <div className="p-6 rounded-2xl bg-card/50 border border-border/60 backdrop-blur-sm flex flex-col items-center justify-center text-center">
-          <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-            <FileText className="w-10 h-10 text-primary" />
+        <div className="p-6 rounded-2xl bg-card/50 border border-border/60 backdrop-blur-sm flex flex-col justify-between">
+          <div>
+            <h3 className="text-lg font-bold font-heading mb-6 flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-purple-400" />
+              Kitob Mutolaasi Progressi
+            </h3>
+            
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className="text-muted-foreground">O'qib bo'lingan (Completed)</span>
+                  <span className="font-bold text-emerald-400">{analytics.bookStats?.completed || 0}</span>
+                </div>
+                <div className="w-full bg-input/40 rounded-full h-2 overflow-hidden">
+                  <div className="bg-emerald-500 h-2 rounded-full transition-all duration-500" style={{ width: `${((analytics.bookStats?.completed || 0) / (analytics.kpis.totalBooks || 1)) * 100}%` }}></div>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className="text-muted-foreground">O'qilmoqda (Reading)</span>
+                  <span className="font-bold text-amber-400">{analytics.bookStats?.reading || 0}</span>
+                </div>
+                <div className="w-full bg-input/40 rounded-full h-2 overflow-hidden">
+                  <div className="bg-amber-500 h-2 rounded-full transition-all duration-500" style={{ width: `${((analytics.bookStats?.reading || 0) / (analytics.kpis.totalBooks || 1)) * 100}%` }}></div>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className="text-muted-foreground">Mutolaa rejalashtirilgan (Want to Read)</span>
+                  <span className="font-bold text-blue-400">{analytics.bookStats?.wantToRead || 0}</span>
+                </div>
+                <div className="w-full bg-input/40 rounded-full h-2 overflow-hidden">
+                  <div className="bg-blue-500 h-2 rounded-full transition-all duration-500" style={{ width: `${((analytics.bookStats?.wantToRead || 0) / (analytics.kpis.totalBooks || 1)) * 100}%` }}></div>
+                </div>
+              </div>
+            </div>
           </div>
-          <h3 className="text-2xl font-bold font-heading mb-2">Workspace Health</h3>
-          <p className="text-muted-foreground mb-6">Your digital garden is actively growing. Keep writing to increase your network of nodes.</p>
-          <div className="w-full bg-input/50 rounded-full h-3 mb-2 overflow-hidden border border-border/40">
-             <div className="bg-gradient-to-r from-primary to-emerald-400 h-3 w-3/4 rounded-full"></div>
+
+          <div className="pt-6 border-t border-border/20 text-center mt-6">
+            <span className="text-xs text-muted-foreground font-bold tracking-widest uppercase">
+              Kutubxonada jami: {analytics.kpis.totalBooks} ta kitob
+            </span>
           </div>
-          <span className="text-xs text-muted-foreground font-bold tracking-widest uppercase">75% active nodes</span>
         </div>
       </div>
 
-      {/* Top Content Table */}
-      <div className="p-6 rounded-2xl bg-card/50 border border-border/60 backdrop-blur-sm">
-        <h3 className="text-lg font-bold font-heading mb-6">Recent Published Content</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-border/40 text-muted-foreground">
-                <th className="pb-3 font-medium">Title</th>
-                <th className="pb-3 font-medium text-right">Date Published</th>
-              </tr>
-            </thead>
-            <tbody>
-              {analytics.recentContent.length === 0 ? (
-                <tr>
-                  <td colSpan={2} className="py-8 text-center text-muted-foreground">No published content found</td>
+      {/* Top Content & Most Read Tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="p-6 rounded-2xl bg-card/50 border border-border/60 backdrop-blur-sm">
+          <h3 className="text-lg font-bold font-heading mb-6">Eng ko'p o'qilgan maqolalar</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border/40 text-muted-foreground">
+                  <th className="pb-3 font-medium">Sarlavha</th>
+                  <th className="pb-3 font-medium text-right">Ko'rishlar soni</th>
                 </tr>
-              ) : (
-                analytics.recentContent.map((article: any, i: number) => (
-                  <tr key={i} className="border-b border-border/20 last:border-0 hover:bg-card/40 transition-colors">
-                    <td className="py-4 font-medium text-foreground">{article.title}</td>
-                    <td className="py-4 text-right text-muted-foreground">{new Date(article.createdAt).toLocaleDateString()}</td>
+              </thead>
+              <tbody>
+                {!analytics.mostReadArticles || analytics.mostReadArticles.length === 0 ? (
+                  <tr>
+                    <td colSpan={2} className="py-8 text-center text-muted-foreground">Maqolalar topilmadi</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  analytics.mostReadArticles.map((article: any, i: number) => (
+                    <tr key={i} className="border-b border-border/20 last:border-0 hover:bg-card/40 transition-colors">
+                      <td className="py-4 font-medium text-foreground">{article.title}</td>
+                      <td className="py-4 text-right text-emerald-400 font-bold font-mono">{article.views} marta</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-card/50 border border-border/60 backdrop-blur-sm">
+          <h3 className="text-lg font-bold font-heading mb-6">Recent Published Content</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border/40 text-muted-foreground">
+                  <th className="pb-3 font-medium">Title</th>
+                  <th className="pb-3 font-medium text-right">Date Published</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analytics.recentContent.length === 0 ? (
+                  <tr>
+                    <td colSpan={2} className="py-8 text-center text-muted-foreground">No published content found</td>
+                  </tr>
+                ) : (
+                  analytics.recentContent.map((article: any, i: number) => (
+                    <tr key={i} className="border-b border-border/20 last:border-0 hover:bg-card/40 transition-colors">
+                      <td className="py-4 font-medium text-foreground">{article.title}</td>
+                      <td className="py-4 text-right text-muted-foreground">{new Date(article.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

@@ -10,7 +10,7 @@ export default function ArticlePage() {
   const [article, setArticle] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useReadingProgress(article?.title || "", "article");
+  const progress = useReadingProgress(article?.title || "", "article");
 
   useEffect(() => {
     fetch(`/api/articles/${slug}`)
@@ -48,7 +48,12 @@ export default function ArticlePage() {
   const url = `${window.location.origin}/article/${article.slug}`;
 
   return (
-    <article className="w-full max-w-4xl mx-auto p-6 md:p-10 my-8 bg-slate-900 border border-slate-800 rounded-2xl">
+    <>
+      <div 
+        className="fixed top-0 left-0 h-1 bg-[#315f4c] z-50 transition-all duration-100 ease-out" 
+        style={{ width: `${progress}%` }}
+      />
+      <article className="w-full max-w-4xl mx-auto p-6 md:p-10 my-8 bg-slate-900 border border-slate-800 rounded-2xl">
       <SEO 
         title={seoTitle}
         description={seoDescription}
@@ -100,5 +105,6 @@ export default function ArticlePage() {
         dangerouslySetInnerHTML={{ __html: article.content }}
       />
     </article>
+  </>
   );
 }

@@ -64,6 +64,7 @@ export function SEO({
       <title>{title}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={finalCanonicalUrl} />
+      <link rel="alternate" type="application/rss+xml" href="/rss.xml" title="Akbarali Blog" />
 
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />

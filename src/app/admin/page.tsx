@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, ArrowLeft, BarChart3, FileText } from "lucide-react";
+import { Plus, Edit, Trash2, ArrowLeft, BarChart3, FileText, Users } from "lucide-react";
 import ArticleForm from "./ArticleForm";
 import { AnalyticsDashboard } from "@/components/analytics-dashboard";
 
@@ -14,7 +14,10 @@ export default function AdminDashboard() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"content" | "analytics">("analytics");
+  const [activeTab, setActiveTab] = useState<"content" | "analytics" | "subscribers">("analytics");
+  const [subscribers, setSubscribers] = useState<any[]>([]);
+  const [loadingSubs, setLoadingSubs] = useState(false);
+  const [subQuery, setSubQuery] = useState("");
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -63,6 +66,67 @@ export default function AdminDashboard() {
       fetchArticles();
     }
   }, [isAuthenticated, isEditing, isCreating]);
+
+  const fetchSubscribers = async () => {
+    setLoadingSubs(true);
+    try {
+      const res = await fetch("/api/admin/subscribers");
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        return;
+      }
+      if (res.ok) {
+        const data = await res.json();
+        setSubscribers(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingSubs(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated && activeTab === "subscribers") {
+      fetchSubscribers();
+    }
+  }, [isAuthenticated, activeTab]);
+
+  const handleToggleConfirm = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/subscribers/${id}/toggle-confirm`, { method: "PUT" });
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        return;
+      }
+      if (res.ok) {
+        const updated = await res.json();
+        setSubscribers(subscribers.map(sub => sub.id === id ? updated : sub));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteSubscriber = async (id: string) => {
+    if (!confirm("Haqiqatan ham ushbu obunachini o'chirib tashlamoqchimisiz?")) return;
+    try {
+      const res = await fetch(`/api/admin/subscribers/${id}`, { method: "DELETE" });
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        return;
+      }
+      if (res.ok) {
+        setSubscribers(subscribers.filter(sub => sub.id !== id));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const filteredSubscribers = subscribers.filter(sub => 
+    sub.email.toLowerCase().includes(subQuery.toLowerCase())
+  );
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this article?")) return;
@@ -188,6 +252,12 @@ export default function AdminDashboard() {
             >
               <FileText className="w-4 h-4" /> Content
             </button>
+            <button 
+              onClick={() => setActiveTab("subscribers")}
+              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-medium text-sm transition-all ${activeTab === 'subscribers' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              <Users className="w-4 h-4" /> Subscribers
+            </button>
           </div>
           <Button variant="outline" onClick={handleLogout} className="rounded-xl border-border/60 hover:bg-red-500/10 hover:text-red-400">
             Chiqish
@@ -195,9 +265,11 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {activeTab === "analytics" ? (
+      {activeTab === "analytics" && (
         <AnalyticsDashboard />
-      ) : (
+      )}
+
+      {activeTab === "content" && (
         <div className="space-y-6">
           <div className="flex justify-end">
             <Button onClick={() => navigate("/admin/articles/new")} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl">
@@ -264,6 +336,76 @@ export default function AdminDashboard() {
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => handleDelete(article.id)} className="hover:bg-red-500/10 hover:text-red-400">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "subscribers" && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold font-heading">Obunachilar</h2>
+              <p className="text-sm text-muted-foreground">Blog yangiliklariga a'zo bo'lgan foydalanuvchilar ro'yxati</p>
+            </div>
+            <input 
+              type="text" 
+              placeholder="Email bo'yicha qidirish..." 
+              value={subQuery}
+              onChange={(e) => setSubQuery(e.target.value)}
+              className="w-full sm:w-72 bg-input/40 border border-border/60 rounded-xl px-4 py-2.5 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+            />
+          </div>
+          
+          <div className="bg-card/50 border border-border/60 rounded-2xl overflow-hidden backdrop-blur-sm">
+            <Table>
+              <TableHeader className="bg-card/30">
+                <TableRow className="border-border/40 hover:bg-card/50">
+                  <TableHead className="text-muted-foreground">Email</TableHead>
+                  <TableHead className="text-muted-foreground">Sana</TableHead>
+                  <TableHead className="text-muted-foreground">Holati</TableHead>
+                  <TableHead className="text-right text-muted-foreground">Amallar</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loadingSubs ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                      Yuklanmoqda...
+                    </TableCell>
+                  </TableRow>
+                ) : filteredSubscribers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                      Obunachilar topilmadi.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredSubscribers.map((sub: any) => (
+                    <TableRow key={sub.id} className="border-border/20 hover:bg-card/40 transition-colors">
+                      <TableCell className="font-medium text-foreground py-4">
+                        {sub.email}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {new Date(sub.createdAt).toLocaleDateString()} {new Date(sub.createdAt).toLocaleTimeString()}
+                      </TableCell>
+                      <TableCell>
+                        <button onClick={() => handleToggleConfirm(sub.id)}>
+                          <Badge variant={sub.confirmed ? 'default' : 'secondary'}
+                            className={`cursor-pointer hover:opacity-80 transition-opacity ${sub.confirmed ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-input/50 text-muted-foreground border-border/40'}`}>
+                            {sub.confirmed ? "Faol (Active)" : "Kutilmoqda (Pending)"}
+                          </Badge>
+                        </button>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteSubscriber(sub.id)} className="hover:bg-red-500/10 hover:text-red-400">
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </TableCell>

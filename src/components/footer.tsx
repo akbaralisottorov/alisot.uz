@@ -8,6 +8,8 @@ export default function Footer() {
          <a href="https://github.com/akbaralisottorov" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">GitHub</a>
          <a href="https://github.com/akbaralisottorov/alisot.uz.git" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Source</a>
          <div className="h-3 w-px bg-border/50" />
+         <a href="/rss.xml" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">RSS</a>
+         <div className="h-3 w-px bg-border/50" />
          <a href="/admin" className="hover:text-primary transition-colors">Admin</a>
       </div>
     </footer>
