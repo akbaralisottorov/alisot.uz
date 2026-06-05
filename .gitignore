@@ -6,5 +6,6 @@ coverage/
 *.log
 .env*
 !.env.example
-
-.vercel
+prisma/dev.db
+prisma/*.db
+scratch/
