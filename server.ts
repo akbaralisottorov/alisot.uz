@@ -90,6 +90,41 @@ const authMiddleware = (req: any, res: any, next: any) => {
   next();
 };
 
+// DRY async route handler — eliminates repetitive try/catch blocks
+const asyncHandler = (fn: (req: any, res: any) => Promise<any>) =>
+  async (req: any, res: any) => {
+    try {
+      await fn(req, res);
+    } catch (e: any) {
+      console.error(`[${req.method} ${req.path}]`, e?.message || e);
+      res.status(500).json({
+        error: "Internal Server Error",
+        details: process.env.NODE_ENV !== "production" ? (e.message || String(e)) : undefined,
+      });
+    }
+  };
+
+// Auto-seed default admin user if no users exist
+const seedDefaultUser = async () => {
+  try {
+    const count = await prisma.user.count();
+    if (count === 0) {
+      const defaultEmail = process.env.ADMIN_EMAIL || "admin@alisot.uz";
+      await prisma.user.create({
+        data: {
+          email: defaultEmail,
+          name: "Akbarali Sottorov",
+        },
+      });
+      console.log(`✅ Default admin user seeded: ${defaultEmail}`);
+    }
+  } catch (e) {
+    console.warn("Could not seed default user (expected in serverless):", e);
+  }
+};
+
+seedDefaultUser();
+
 // Create public/uploads directory if it doesn't exist
 const uploadDir = path.join(process.cwd(), "public/uploads");
 if (!fs.existsSync(uploadDir)) {
@@ -560,7 +595,15 @@ app.post("/api/admin/articles", async (req, res) => {
   }
 });
 
+// GET single article (for edit page — avoids race condition with list)
+app.get("/api/admin/articles/:id", asyncHandler(async (req, res) => {
+  const article = await ArticleRepository.getArticleById(req.params.id);
+  if (!article) return res.status(404).json({ error: "Article not found" });
+  res.json(article);
+}));
+
 app.put("/api/admin/articles/:id", async (req, res) => {
+
   try {
     const { id } = req.params;
     const { title, slug, excerpt, content, coverImage, status, featured, seoTitle, seoDescription } = req.body;
@@ -585,15 +628,11 @@ app.delete("/api/admin/articles/:id", async (req, res) => {
   }
 });
 
-app.get("/api/users", async (req, res) => {
-  try {
-    const users = await UserRepository.getAllUsers();
-    res.json(users);
-  } catch (e: any) {
-    console.log("Error:", e?.message || e);
-    res.status(500).json({ error: "Failed to fetch users", details: e.message || String(e) });
-  }
-});
+// /api/users is protected — only admin can list users
+app.get("/api/users", authMiddleware, asyncHandler(async (req, res) => {
+  const users = await UserRepository.getAllUsers();
+  res.json(users);
+}));
 
 app.get("/api/admin/analytics", async (req, res) => {
   try {
