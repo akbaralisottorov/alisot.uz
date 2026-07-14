@@ -1,6 +1,7 @@
 import type { FC } from "react"
 import { ExternalLink, Github } from "lucide-react"
 import { TiltCard } from "./tilt-card"
+import { motion } from "motion/react"
 
 interface ProjectCardProps {
   title: string
@@ -19,8 +20,10 @@ const ProjectCard: FC<ProjectCardProps> = ({
 }) => {
   return (
     <TiltCard className="h-full">
-      <div 
-        className="h-full bg-card/80 border border-border/60 rounded-2xl p-6 md:p-8 flex flex-col justify-between group overflow-hidden relative transition-colors hover:border-primary/80 backdrop-blur-md"
+      <motion.div 
+        whileHover={{ scale: 1.02, y: -4 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        className="h-full bg-card/80 border border-border/60 rounded-2xl p-6 md:p-8 flex flex-col justify-between group overflow-hidden relative transition-all duration-300 hover:border-primary/80 hover:shadow-xl hover:shadow-primary/5 backdrop-blur-md cursor-pointer"
         style={{ transformStyle: "preserve-3d" }}
       >
         <div className="relative z-10 flex-1" style={{ transform: "translateZ(30px)", transformStyle: "preserve-3d" }}>
@@ -48,12 +51,13 @@ const ProjectCard: FC<ProjectCardProps> = ({
             style={{ transform: "translateZ(25px)" }}
           >
             {tags.map((tag) => (
-              <span
+              <motion.span
                 key={tag}
-                className="px-3 py-1 bg-input/40 border border-border/40 rounded-xl text-xs text-muted-foreground backdrop-blur-sm"
+                whileHover={{ scale: 1.05, y: -1 }}
+                className="px-3 py-1 bg-input/40 border border-border/40 hover:border-gold hover:text-gold rounded-xl text-xs text-muted-foreground backdrop-blur-sm transition-colors cursor-default"
               >
                 {tag}
-              </span>
+              </motion.span>
             ))}
           </div>
         </div>
@@ -91,7 +95,7 @@ const ProjectCard: FC<ProjectCardProps> = ({
           className="absolute -right-4 -bottom-4 w-40 h-40 bg-primary/20 rounded-full blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out"
           style={{ transform: "translateZ(-20px)" }}
         />
-      </div>
+      </motion.div>
     </TiltCard>
   )
 }

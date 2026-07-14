@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { SEO } from "@/components/SEO";
 import { Search, Laptop, Code2, PenTool } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { FadeIn, StaggerContainer, StaggerItem, HoverCard } from "@/components/animations";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations";
 import { AnimatePresence, motion } from "motion/react";
 
 interface UseItem {
@@ -20,7 +20,7 @@ interface UseCategory {
 const usesData: UseCategory[] = [
   {
     title: "Hardware",
-    icon: <Laptop className="w-5 h-5" />,
+    icon: <Laptop className="w-5 h-5 text-gold" />,
     items: [
       { name: "MacBook Pro 16\"", description: "M3 Max, 64GB RAM. My primary machine that handles everything from heavy rendering to local LLMs.", tags: ["laptop"] },
       { name: "iPhone 15 Pro", description: "Primary mobile device. Great for capturing quick ideas and testing mobile responsive designs.", tags: ["phone"] },
@@ -31,7 +31,7 @@ const usesData: UseCategory[] = [
   },
   {
     title: "Software",
-    icon: <Code2 className="w-5 h-5" />,
+    icon: <Code2 className="w-5 h-5 text-gold" />,
     items: [
       { name: "Cursor", description: "My main IDE right now. The AI integration specifically designed for coding flows is unmatched.", tags: ["ide", "ai tools"] },
       { name: "VS Code", description: "Still keep it around for specific workflows and its vast extension ecosystem.", tags: ["ide"] },
@@ -44,7 +44,7 @@ const usesData: UseCategory[] = [
   },
   {
     title: "Content Creation",
-    icon: <PenTool className="w-5 h-5" />,
+    icon: <PenTool className="w-5 h-5 text-gold" />,
     items: [
       { name: "Figma", description: "For all UI design, wireframing, and quick vector assets. I practically live in this tool.", tags: ["design tools"] },
       { name: "DaVinci Resolve", description: "My choice for video editing. Incredibly powerful and the color grading tools are industry standard.", tags: ["editing tools"] },
@@ -57,7 +57,6 @@ const usesData: UseCategory[] = [
 export default function UsesPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter data based on search
   const filteredData = useMemo(() => {
     return usesData.map(category => {
       const filteredItems = category.items.filter(item => {
@@ -73,23 +72,23 @@ export default function UsesPage() {
   }, [searchQuery]);
 
   return (
-    <div className="flex-1 w-full max-w-5xl mx-auto py-16 px-6 text-foreground">
-      <SEO title="Uses - Alisot" description="A curated list of the hardware and software I use to build things on the internet." />
+    <div className="w-full max-w-[1000px] mx-auto py-12 px-6 md:px-12 text-left selection:bg-gold/25 selection:text-foreground">
+      <SEO title="Uses - Akbarali Sottorov" description="A curated list of the hardware and software I use to build things on the internet." />
       
       {/* Header */}
-      <FadeIn className="mb-16">
-        <h1 className="text-4xl md:text-5xl font-heading font-bold mb-6 text-foreground">What I Use</h1>
-        <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed mb-8">
+      <FadeIn className="space-y-4 mb-16">
+        <h1 className="font-heading font-extrabold text-4xl md:text-[54px] leading-tight text-foreground">What I Use</h1>
+        <p className="font-sans text-lg text-muted-foreground max-w-[650px] leading-relaxed mb-8">
           A frequently asked question is what gear and software I use for my daily work. 
           Here is a comprehensive, categorized list of everything I currently rely on to code, design, and create.
         </p>
         
         {/* Search */}
         <div className="relative max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
           <Input 
             placeholder="Search tools, hardware, categories..." 
-            className="pl-12 h-14 bg-card/50 border-border/60 rounded-2xl text-base shadow-sm backdrop-blur-sm focus-visible:ring-primary/30 transition-all hover:bg-card focus:bg-card"
+            className="pl-12 bg-white dark:bg-card border-border hover:border-gold/40 focus-ring h-12 rounded-[16px] text-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -97,7 +96,7 @@ export default function UsesPage() {
       </FadeIn>
 
       {/* Content */}
-      <div className="space-y-20">
+      <div className="space-y-16">
         <AnimatePresence mode="popLayout">
           {filteredData.length > 0 ? (
             filteredData.map((category, catIdx) => (
@@ -109,37 +108,37 @@ export default function UsesPage() {
                 transition={{ duration: 0.5, delay: catIdx * 0.1 }}
                 layout="position"
               >
-                <div className="flex items-center gap-3 mb-8 border-b border-border/40 pb-4">
-                  <div className="p-2 bg-primary/10 rounded-xl text-primary">
+                <div className="flex items-center gap-3 mb-8 border-b border-border pb-4">
+                  <div className="p-2 bg-gold/10 rounded-xl text-gold">
                     {category.icon}
                   </div>
-                  <h2 className="text-2xl font-heading font-bold">{category.title}</h2>
+                  <h2 className="font-heading text-2xl font-bold text-foreground">{category.title}</h2>
                 </div>
                 
-                <StaggerContainer className="grid md:grid-cols-2 gap-6" staggerChildren={0.05}>
+                <StaggerContainer className="grid md:grid-cols-2 gap-[32px]">
                   {category.items.map((item) => (
                     <StaggerItem key={item.name}>
-                      <HoverCard className="h-full p-6 rounded-2xl bg-card border border-border/60 hover:border-primary/40 transition-colors group flex flex-col">
-                        <div className="flex justify-between items-start mb-3">
-                          <h3 className="font-heading font-bold text-lg text-foreground group-hover:text-primary transition-colors">
+                      <div className="h-full p-8 rounded-[24px] bg-white dark:bg-card border border-border hover:border-gold hover:-translate-y-1 hover:shadow-md transition-all duration-300 group flex flex-col justify-between">
+                        <div>
+                          <h3 className="font-sans font-bold text-lg text-foreground group-hover:text-gold transition-colors mb-2">
                             {item.name}
                           </h3>
+                          <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                            {item.description}
+                          </p>
                         </div>
-                        <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-                          {item.description}
-                        </p>
                         
-                        <div className="mt-auto flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-1.5 mt-auto">
                           {item.tags.map(tag => (
                             <span 
                               key={tag} 
-                              className="px-3 py-1 bg-input/40 border border-border/40 rounded-full text-xs font-medium text-muted-foreground capitalize"
+                              className="px-2.5 py-1 bg-background border border-border/80 rounded-lg text-xs font-medium text-muted-foreground capitalize"
                             >
                               {tag}
                             </span>
                           ))}
                         </div>
-                      </HoverCard>
+                      </div>
                     </StaggerItem>
                   ))}
                 </StaggerContainer>
@@ -151,9 +150,9 @@ export default function UsesPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="text-center py-20 bg-card/30 rounded-2xl border border-border/40 border-dashed"
+              className="text-center py-20 bg-white dark:bg-card rounded-[24px] border border-border border-dashed"
             >
-              <p className="text-muted-foreground text-lg">No tools or hardware matched your search.</p>
+              <p className="text-muted-foreground text-sm font-medium">No tools or hardware matched your search.</p>
             </motion.div>
           )}
         </AnimatePresence>

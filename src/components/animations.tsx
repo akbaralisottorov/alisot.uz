@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from "motion/react";
-import { ReactNode, forwardRef } from "react";
+import { motion, AnimatePresence, useInView } from "motion/react";
+import { ReactNode, forwardRef, useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 
 export const pageVariants = {
@@ -161,3 +161,108 @@ export const HoverCard = ({ children, className = "" }: { children: ReactNode; c
     </motion.div>
   );
 };
+
+export function ScrollRestoration() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
+export function CountUp({
+  to,
+  from = 0,
+  duration = 1.5,
+  delay = 0,
+  className = "",
+  suffix = "",
+  prefix = "",
+}: {
+  to: number;
+  from?: number;
+  duration?: number;
+  delay?: number;
+  className?: string;
+  suffix?: string;
+  prefix?: string;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const [count, setCount] = useState(from);
+
+  useEffect(() => {
+    if (!isInView) return;
+
+    let startTime: number | null = null;
+    let animationFrameId: number;
+
+    const startDelayTimeout = setTimeout(() => {
+      const step = (timestamp: number) => {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
+        
+        // Easing: easeOutExpo
+        const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+        
+        const currentCount = Math.floor(easeProgress * (to - from) + from);
+        setCount(currentCount);
+
+        if (progress < 1) {
+          animationFrameId = requestAnimationFrame(step);
+        }
+      };
+      animationFrameId = requestAnimationFrame(step);
+    }, delay * 1000);
+
+    return () => {
+      clearTimeout(startDelayTimeout);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [isInView, to, from, duration, delay]);
+
+  return (
+    <span ref={ref} className={className}>
+      {prefix}
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
+
+export function Floating({
+  children,
+  className = "",
+  duration = 6,
+  yRange = [6, -6],
+  rotateRange = [-1, 1],
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  duration?: number;
+  yRange?: [number, number];
+  rotateRange?: [number, number];
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      animate={{
+        y: yRange,
+        rotate: rotateRange,
+      }}
+      transition={{
+        duration: duration,
+        repeat: Infinity,
+        repeatType: "reverse",
+        ease: "easeInOut",
+        delay: delay,
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}

@@ -124,10 +124,10 @@ export function GardenGraph({ notes }: { notes: any[] }) {
 
     // Notes
     notes.forEach((note) => {
-      processItem(note, "note", "#8b5cf6", "/garden", (n) => 
-        n.status === "SEEDLING" ? "#f59e0b" :
-        n.status === "INCUBATOR" ? "#3b82f6" :
-        n.status === "EVERGREEN" ? "#10b981" : "#8b5cf6"
+      processItem(note, "note", "#708271", "/garden", (n) => 
+        n.status === "SEEDLING" ? "#C9A96E" :
+        n.status === "INCUBATOR" ? "#708271" :
+        n.status === "EVERGREEN" ? "#4C8B5C" : "#708271"
       );
 
       // Connect note to its linkedNodes
@@ -143,22 +143,23 @@ export function GardenGraph({ notes }: { notes: any[] }) {
     
     // Articles
     articles.forEach((article) => {
-      processItem(article, "article", "#ef4444", "/article"); 
+      processItem(article, "article", "#33473B", "/article"); 
     });
     
     // Books
     books.forEach((book) => {
-      processItem(book, "book", "#a855f7", "/books"); 
+      processItem(book, "book", "#243329", "/books"); 
     });
     
     // Projects
     const projects = [
-      { id: "p1", title: "E-Commerce", tags: "React,TypeScript", slug: "p1" },
-      { id: "p2", title: "Task App", tags: "Node.js,MongoDB", slug: "p2" },
-      { id: "p3", title: "Portfolio", tags: "React,Vite", slug: "p3" }
+      { id: "p1", title: "Tax Helper", tags: "React,TypeScript,Next.js", slug: "p1" },
+      { id: "p2", title: "Teran Fikr", tags: "React,Node.js,PostgreSQL", slug: "p2" },
+      { id: "p3", title: "PIO Pay", tags: "Next.js,Stripe,TypeScript", slug: "p3" },
+      { id: "p4", title: "HRAkso AI", tags: "React,Python,FastAPI", slug: "p4" }
     ];
     projects.forEach(p => {
-      processItem(p, "project", "#ec4899", "/#projects");
+      processItem(p, "project", "#708271", "/#projects");
     });
 
     // Degree calculation for node sizing
@@ -196,20 +197,20 @@ export function GardenGraph({ notes }: { notes: any[] }) {
   return (
     <div 
       ref={containerRef} 
-      className="w-full h-[600px] md:h-[700px] border border-border/40 rounded-2xl overflow-hidden bg-card/30 backdrop-blur-sm relative"
+      className="w-full h-[600px] md:h-[700px] border border-border rounded-[24px] overflow-hidden bg-white dark:bg-card relative shadow-sm"
     >
-      <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 max-w-[85%] md:max-w-none text-[10px] md:text-xs">
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-background/80 border border-border/40 rounded-lg backdrop-blur-md shadow-sm">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#10b981]"></div>
+      <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 max-w-[85%] md:max-w-none text-[10px] md:text-xs text-left">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/80 dark:bg-card/80 border border-border rounded-lg backdrop-blur-md shadow-sm">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#4C8B5C]"></div>
           <span>Evergreen: Pishgan fikr — barqaror</span>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-background/80 border border-border/40 rounded-lg backdrop-blur-md shadow-sm">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></div>
-          <span>Incubator: O'sib bormoqda — regularly update</span>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/80 dark:bg-card/80 border border-border rounded-lg backdrop-blur-md shadow-sm">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#708271]"></div>
+          <span>Incubator: O'sib bormoqda</span>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-background/80 border border-border/40 rounded-lg backdrop-blur-md shadow-sm">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></div>
-          <span>Seedling: Yangi g'oya — hali rivojlanmoqda</span>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/80 dark:bg-card/80 border border-border rounded-lg backdrop-blur-md shadow-sm">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#C9A96E]"></div>
+          <span>Seedling: Yangi g'oya</span>
         </div>
       </div>
       

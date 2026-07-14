@@ -5,6 +5,7 @@ import { Sprout, Search, Filter, Leaf, LayoutGrid, Network } from "lucide-react"
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GardenGraph } from "@/components/garden-graph";
+import { FadeIn } from "@/components/animations";
 
 export default function GardenPage() {
   const [notes, setNotes] = useState<any[]>([]);
@@ -50,16 +51,16 @@ export default function GardenPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "SEEDLING": return "text-amber-500 border-amber-500/30 bg-amber-500/10";
-      case "INCUBATOR": return "text-blue-500 border-blue-500/30 bg-blue-500/10";
-      case "EVERGREEN": return "text-emerald-500 border-emerald-500/30 bg-emerald-500/10";
-      default: return "text-slate-400 border-slate-750 bg-slate-800";
+      case "SEEDLING": return "text-gold border-gold/30 bg-gold/5";
+      case "INCUBATOR": return "text-secondary border-secondary/30 bg-secondary/5";
+      case "EVERGREEN": return "text-success border-success/30 bg-success/5";
+      default: return "text-muted border-border bg-background";
     }
   };
 
   const getStatusIcon = (status: string) => {
-    if (status === "SEEDLING") return <Sprout className="w-4 h-4" />;
-    return <Leaf className="w-4 h-4" />;
+    if (status === "SEEDLING") return <Sprout className="w-4 h-4 text-gold" />;
+    return <Leaf className="w-4 h-4 text-secondary" />;
   };
 
   const getStatusLabel = (status: string) => {
@@ -72,54 +73,59 @@ export default function GardenPage() {
   };
 
   return (
-    <div className="flex-1 w-full max-w-7xl mx-auto py-8 px-6 text-foreground">
-      <SEO title="Raqamli Bog' - Alisot" description="Akbarali Sottorovning raqamli bog'i — g'oyalar, tushunchalar va fikrlar to'plami." />
+    <div className="w-full max-w-[1200px] mx-auto py-12 px-6 md:px-12 text-left selection:bg-gold/25 selection:text-foreground">
+      <SEO title="Raqamli Bog' - Akbarali Sottorov" description="Akbarali Sottorovning raqamli bog'i — g'oyalar, tushunchalar va fikrlar to'plami." />
       
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-        <div>
-          <div className="flex items-center gap-4 mb-2">
-            <Leaf className="w-8 h-8 text-primary" />
-            <h1 className="text-4xl font-bold font-heading text-foreground">Raqamli Bog'</h1>
+      {/* Header and Toggle */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+        <FadeIn className="space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gold/30 bg-gold/5 text-gold text-xs font-semibold uppercase tracking-widest w-max">
+            <Leaf className="w-4 h-4" />
+            <span>Digital Garden</span>
           </div>
-          <p className="text-muted-foreground max-w-2xl">Bu mening raqamli bog'im — g'oyalar, tushunchalar va fikrlarning tirik to'plami.</p>
-        </div>
+          <h1 className="font-heading font-extrabold text-4xl md:text-[54px] leading-tight text-foreground">Raqamli Bog'</h1>
+          <p className="font-sans text-lg text-muted-foreground max-w-[650px] leading-relaxed">
+            Bu mening raqamli bog'im — g'oyalar, tushunchalar, mutolaa qaydlari va fikrlarning tirik va o'sib boruvchi to'plami.
+          </p>
+        </FadeIn>
         
-        <div className="flex items-center gap-2 p-1 bg-input/50 rounded-xl border border-border/40 w-fit backdrop-blur-sm">
+        {/* Toggle Mode */}
+        <FadeIn delay={0.1} className="flex items-center gap-2 p-1 bg-white dark:bg-card rounded-[14px] border border-border w-fit shadow-sm">
           <button 
             onClick={() => setViewMode("grid")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all ${viewMode === 'grid' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-[10px] font-semibold text-xs transition-all cursor-pointer ${viewMode === 'grid' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
           >
-            <LayoutGrid className="w-4 h-4" /> Grid
+            <LayoutGrid className="w-3.5 h-3.5" /> Grid
           </button>
           <button 
             onClick={() => setViewMode("graph")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all ${viewMode === 'graph' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-[10px] font-semibold text-xs transition-all cursor-pointer ${viewMode === 'graph' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
           >
-            <Network className="w-4 h-4" /> Grafik
+            <Network className="w-3.5 h-3.5" /> Grafik
           </button>
-        </div>
+        </FadeIn>
       </div>
 
       {/* Filters and Search */}
-      <div className="flex flex-col md:flex-row gap-4 mb-10">
+      <FadeIn delay={0.1} className="flex flex-col md:flex-row gap-4 mb-12">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
           <Input 
             placeholder="Qaydlarni qidirish..." 
-            className="pl-10 bg-card/50 border-border/60 h-12"
+            className="pl-12 bg-white dark:bg-card border-border hover:border-gold/40 focus-ring h-12 rounded-[16px] text-sm"
             value={searchInput}
             onChange={handleSearch}
           />
         </div>
         <div className="w-full md:w-56">
           <Select value={statusFilter} onValueChange={handleStatusFilter}>
-            <SelectTrigger className="h-12 bg-card/50 border-border/60">
+            <SelectTrigger className="h-12 bg-white dark:bg-card border-border rounded-[16px] text-sm focus-ring">
               <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4 text-muted-foreground" />
+                <Filter className="w-4 h-4 text-muted" />
                 <SelectValue placeholder="Holati" />
               </div>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white dark:bg-card border border-border rounded-[16px]">
               <SelectItem value="ALL">Barcha qaydlar</SelectItem>
               <SelectItem value="SEEDLING">Seedling (Yangi g'oya)</SelectItem>
               <SelectItem value="INCUBATOR">Incubator (O'sib bormoqda)</SelectItem>
@@ -127,36 +133,52 @@ export default function GardenPage() {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </FadeIn>
 
+      {/* Main Content Grid/Graph */}
       {loading ? (
-        <div className="flex justify-center py-20 text-muted-foreground">Raqamli bog' yuklanmoqda...</div>
+        <div className="flex justify-center py-20 text-muted-foreground font-medium">Raqamli bog' yuklanmoqda...</div>
       ) : notes.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground bg-card/20 rounded-2xl border border-border/40 border-dashed backdrop-blur-sm">
+        <div className="text-center py-20 text-muted-foreground bg-white dark:bg-card border border-border border-dashed rounded-[24px] shadow-sm">
           Raqamli bog'da siz tanlagan mezonlarga mos keladigan qaydlar topilmadi.
         </div>
       ) : (
-        <>
+        <FadeIn delay={0.2}>
           {viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[32px]">
               {notes.map((note) => (
-                <Link key={note.id} to={`/garden/${note.slug}`} className="group flex flex-col bg-card/60 border border-border/60 p-6 rounded-2xl overflow-hidden hover:border-primary/50 transition-colors h-full backdrop-blur-md">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(note.status)}`}>
+                <Link 
+                  key={note.id} 
+                  to={`/garden/${note.slug}`} 
+                  className="group flex flex-col bg-white dark:bg-card border border-border p-8 rounded-[24px] hover:border-gold hover:-translate-y-1.5 hover:shadow-md transition-all duration-300 h-full text-left focus-ring"
+                >
+                  <div className="flex justify-between items-start mb-5">
+                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border ${getStatusColor(note.status)}`}>
                       {getStatusIcon(note.status)}
                       <span className="uppercase tracking-widest">
                         {note.status === "SEEDLING" ? "Seedling" : note.status === "INCUBATOR" ? "Incubator" : "Evergreen"}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">{new Date(note.updatedAt).toLocaleDateString()}</span>
+                    <span className="text-xs text-muted-foreground/60">{new Date(note.updatedAt).toLocaleDateString()}</span>
                   </div>
-                  <h3 className="font-heading font-bold text-xl text-foreground group-hover:text-primary transition-colors mb-1">{note.title}</h3>
-                  <p className="text-xs text-primary mb-4 italic font-sans">{getStatusLabel(note.status)}</p>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-3">{note.content.substring(0, 150)}{note.content.length > 150 ? "..." : ""}</p>
                   
-                  <div className="mt-auto pt-4 flex gap-2 flex-wrap">
+                  <h3 className="font-heading font-extrabold text-[22px] text-foreground group-hover:text-gold transition-colors mb-1.5 leading-snug">
+                    {note.title}
+                  </h3>
+                  
+                  <p className="text-[11px] text-muted font-semibold italic mb-4">
+                    {getStatusLabel(note.status)}
+                  </p>
+                  
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-6 line-clamp-3">
+                    {note.content.substring(0, 150)}{note.content.length > 150 ? "..." : ""}
+                  </p>
+                  
+                  <div className="mt-auto pt-4 border-t border-border/50 flex gap-2 flex-wrap">
                     {(note.tags ? note.tags.split(",") : []).map((tag: string) => tag.trim() && (
-                      <span key={tag} className="text-xs text-muted-foreground bg-background/50 px-3 py-1 rounded-xl border border-border/40">#{tag.trim()}</span>
+                      <span key={tag} className="text-[11px] font-semibold text-muted bg-background border border-border/80 px-2.5 py-1 rounded-lg">
+                        #{tag.trim()}
+                      </span>
                     ))}
                   </div>
                 </Link>
@@ -165,7 +187,7 @@ export default function GardenPage() {
           ) : (
             <GardenGraph notes={notes} />
           )}
-        </>
+        </FadeIn>
       )}
     </div>
   );

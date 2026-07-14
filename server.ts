@@ -16,6 +16,23 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const app = express();
+
+// Strict Security Headers
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://*.unsplash.com *; connect-src 'self' https://vitals.vercel-insights.com *;"
+  );
+  if (process.env.NODE_ENV === "production") {
+    res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  }
+  next();
+});
+
 app.use(express.json());
 
 const JWT_SECRET = process.env.ADMIN_PASSWORD || "fallback_admin_secret_key_123";
@@ -209,6 +226,83 @@ app.post("/api/search", async (req, res) => {
 // API Routes
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
+});
+
+app.post("/api/contact", async (req, res) => {
+  try {
+    const { name, email, subject, message, website } = req.body;
+
+    // Honeypot check
+    if (website) {
+      console.warn("Honeypot triggered by spam bot, email:", email);
+      return res.status(200).json({ success: true, message: "Discarded silently" });
+    }
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ error: "Barcha majburiy maydonlarni to'ldiring" });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Noto'g'ri email shakli" });
+    }
+
+    const contactMessage = {
+      id: crypto.randomUUID(),
+      name,
+      email,
+      subject,
+      message,
+      createdAt: new Date().toISOString()
+    };
+
+    const contactLogPath = path.join(process.cwd(), "public/uploads/contact_messages.json");
+    let messages = [];
+    if (fs.existsSync(contactLogPath)) {
+      try {
+        const raw = fs.readFileSync(contactLogPath, "utf8");
+        messages = JSON.parse(raw);
+      } catch (err) {
+        console.error("Error reading contact logs:", err);
+      }
+    }
+    messages.push(contactMessage);
+    try {
+      fs.writeFileSync(contactLogPath, JSON.stringify(messages, null, 2), "utf8");
+    } catch (err) {
+      console.error("Error writing contact logs:", err);
+    }
+
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const { Resend } = await import("resend");
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+          from: "Alisot Portfolio <onboarding@resend.dev>",
+          to: "akbaraliy.phone@gmail.com",
+          subject: `Yangi xabar: ${subject}`,
+          html: `
+            <h2>Alisot.uz orqali yangi maktub</h2>
+            <p><strong>Ism:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Mavzu:</strong> ${subject}</p>
+            <p><strong>Xabar:</strong></p>
+            <blockquote style="background: #f4f4f4; padding: 15px; border-left: 5px solid #d4af37; color: #333;">
+              ${message.replace(/\n/g, "<br>")}
+            </blockquote>
+          `
+        });
+        console.log("Email sent successfully via Resend.");
+      } catch (emailErr) {
+        console.error("Resend delivery failed:", emailErr);
+      }
+    }
+
+    return res.status(200).json({ success: true, message: "Xabar yuborildi" });
+  } catch (err: any) {
+    console.error("Contact API error:", err);
+    return res.status(500).json({ error: "Xabarni yuborishda xatolik yuz berdi" });
+  }
 });
 
 app.post("/api/subscribe", async (req, res) => {

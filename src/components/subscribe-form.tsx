@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Send, CheckCircle2, AlertCircle, Mail } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { motion, AnimatePresence } from "motion/react";
 
 export default function SubscribeForm() {
   const [email, setEmail] = useState("");
@@ -13,7 +14,6 @@ export default function SubscribeForm() {
     e.preventDefault();
     if (!email) return;
 
-    // Client-side validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setStatus("error");
@@ -50,68 +50,98 @@ export default function SubscribeForm() {
   };
 
   return (
-    <div className="w-full bg-card/30 border border-border/60 rounded-2xl p-6 md:p-8 backdrop-blur-md hover:border-primary/40 transition-all duration-300">
-      {status === "success" ? (
-        <div className="flex flex-col items-center justify-center text-center py-6 animate-in fade-in zoom-in duration-300">
-          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
-            <CheckCircle2 className="w-6 h-6 animate-bounce" />
-          </div>
-          <h3 className="font-heading font-bold text-lg text-foreground mb-2">Obuna muvaffaqiyatli yakunlandi!</h3>
-          <p className="text-muted-foreground text-sm max-w-md">
-            Rahmat! Siz Akbarali Sottorovning marketing, brending va shaxsiy rivojlanish haqidagi tahlillariga muvaffaqiyatli obuna bo'ldingiz.
-          </p>
-        </div>
-      ) : (
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex-1 space-y-2 text-left w-full">
-            <span className="font-heading text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2">
-              <Mail className="w-3.5 h-3.5" /> Newsletter
-            </span>
-            <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground">
-              Yangiliklardan xabardor bo'ling
-            </h2>
-            <p className="text-muted-foreground text-sm max-w-xl">
-              Marketing, brend strategiyalari va xulq-atvor iqtisodiyoti bo'yicha eng so'nggi maqolalar va shaxsiy tahlillarni elektron pochtangizga qabul qiling.
-            </p>
-          </div>
+    <div className="w-full bg-white dark:bg-card border border-border rounded-[24px] p-8 md:p-12 shadow-sm text-left relative overflow-hidden">
+      {/* Subtle background graphics */}
+      <div className="absolute -right-16 -bottom-16 w-64 h-64 bg-gold/5 rounded-full blur-3xl pointer-events-none" />
 
-          <form onSubmit={handleSubmit} className="w-full md:w-auto flex-1 max-w-md flex flex-col gap-2">
-            <div className="flex flex-col sm:flex-row gap-2 w-full">
-              <Input
-                type="email"
-                placeholder="Elektron pochtangiz"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
-                className="flex-1 bg-input/40 border-border/60 hover:border-primary/40 focus-visible:ring-primary rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground text-sm"
-              />
-              <Button
-                type="submit"
-                disabled={loading}
-                className="bg-primary text-primary-foreground hover:bg-primary/95 rounded-xl font-bold px-6 py-3 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/10 hover:shadow-primary/25 disabled:opacity-50"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                    Yuklanmoqda...
-                  </>
-                ) : (
-                  <>
-                    Obuna bo'lish
-                    <Send className="w-4 h-4" />
-                  </>
-                )}
-              </Button>
+      <AnimatePresence mode="wait">
+        {status === "success" ? (
+          <motion.div 
+            key="success"
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col items-center justify-center text-center py-6"
+          >
+            <div className="w-12 h-12 bg-gold/10 rounded-full flex items-center justify-center text-gold mb-4 font-bold">
+              <CheckCircle2 className="w-6 h-6 animate-pulse" />
             </div>
-            {status === "error" && (
-              <div className="flex items-center gap-2 text-red-400 text-xs mt-1 animate-in slide-in-from-top-1 duration-200">
-                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                <span>{message}</span>
+            <h3 className="font-heading font-extrabold text-2xl text-foreground mb-2">Obuna muvaffaqiyatli yakunlandi!</h3>
+            <p className="font-sans text-muted-foreground text-base max-w-md leading-relaxed">
+              Rahmat! Siz Akbarali Sottorovning marketing, brending va shaxsiy rivojlanish haqidagi tahlillariga muvaffaqiyatli obuna bo'ldingiz. Har ikki haftada yakshanba tongida xabarlarni pochtangizda kuting.
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="form"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col lg:flex-row items-start justify-between gap-10"
+          >
+            <div className="flex-1 space-y-3 w-full">
+              <span className="font-sans text-xs font-bold uppercase tracking-widest text-gold flex items-center gap-2">
+                <Mail className="w-3.5 h-3.5" /> BEYSLETTER (XABARNOMA)
+              </span>
+              <h2 className="font-heading font-extrabold text-3xl md:text-4xl text-foreground leading-tight">
+                Yakshanba tongidagi mulohaza
+              </h2>
+              <p className="font-sans text-base text-muted-foreground max-w-xl leading-relaxed">
+                Sizga har ikki haftada bir marta eng yaxshi marketing, brend strategiyalari, xulq-atvor iqtisodiyoti bo'yicha tahlillar va kitob xulosalarini yuboraman. Reklamasiz, spamsiz — faqat chuqur kontent.
+              </p>
+              <div className="pt-2 text-xs text-muted-foreground/80 flex flex-wrap gap-x-6 gap-y-2">
+                <span>📅 Davriylik: Har 14 kunda</span>
+                <span>🔒 Kafolat: Spam umuman yo'q</span>
               </div>
-            )}
-          </form>
-        </div>
-      )}
+            </div>
+
+            <form onSubmit={handleSubmit} className="w-full lg:w-auto flex-1 max-w-md flex flex-col gap-2 pt-2">
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <Input
+                  type="email"
+                  placeholder="Elektron pochtangiz"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  className="flex-1 bg-background border border-border hover:border-gold/40 focus-ring rounded-[16px] px-4 py-3 h-12 text-foreground placeholder:text-muted-foreground text-sm transition-all duration-300"
+                />
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-gold hover:bg-gold-hover text-white rounded-[16px] font-bold px-6 h-12 transition-all flex items-center justify-center gap-2 shadow-sm shadow-gold/20 cursor-pointer disabled:opacity-50 focus-ring"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Yuklanmoqda...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Mutolaaga qo'shilish</span>
+                      <Send className="w-4 h-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+              
+              <AnimatePresence>
+                {status === "error" && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    className="flex items-center gap-2 text-red-500 text-xs mt-2.5 font-sans font-medium"
+                  >
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{message}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
