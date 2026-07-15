@@ -165,6 +165,9 @@ const upload = multer({ storage });
 // Serve public uploads statically
 app.use("/uploads", express.static(uploadDir));
 
+// Serve other static files in the public directory (like portrait.png, cover images)
+app.use(express.static(path.join(process.cwd(), "public")));
+
 // Audit logging for security events
 const logSecurityEvent = (event: "SUCCESS" | "INVALID_PASSWORD" | "INVALID_CAPTCHA", req: any) => {
   try {
