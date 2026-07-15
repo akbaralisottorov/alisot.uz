@@ -3,7 +3,6 @@ import { Send, CheckCircle2, AlertCircle, Mail } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { motion, AnimatePresence } from "motion/react";
-import { API_ROUTES } from "@/lib/constants";
 
 export default function SubscribeForm() {
   const [email, setEmail] = useState("");
@@ -11,18 +10,9 @@ export default function SubscribeForm() {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    // Clear error when user starts typing again
-    if (status === "error") {
-      setStatus("idle");
-      setMessage("");
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email) return;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -36,7 +26,7 @@ export default function SubscribeForm() {
     setMessage("");
 
     try {
-      const res = await fetch(API_ROUTES.subscribe, {
+      const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -51,7 +41,7 @@ export default function SubscribeForm() {
         setStatus("error");
         setMessage(data.error || "Xatolik yuz berdi. Iltimos qaytadan urunib ko'ring.");
       }
-    } catch {
+    } catch (err) {
       setStatus("error");
       setMessage("Tarmoqda xatolik yuz berdi. Ulanishni tekshiring.");
     } finally {
@@ -78,15 +68,9 @@ export default function SubscribeForm() {
               <CheckCircle2 className="w-6 h-6 animate-pulse" />
             </div>
             <h3 className="font-heading font-extrabold text-2xl text-foreground mb-2">Obuna muvaffaqiyatli yakunlandi!</h3>
-            <p className="font-sans text-muted-foreground text-base max-w-md leading-relaxed mb-4">
+            <p className="font-sans text-muted-foreground text-base max-w-md leading-relaxed">
               Rahmat! Siz Akbarali Sottorovning marketing, brending va shaxsiy rivojlanish haqidagi tahlillariga muvaffaqiyatli obuna bo'ldingiz. Har ikki haftada yakshanba tongida xabarlarni pochtangizda kuting.
             </p>
-            <button
-              onClick={() => setStatus("idle")}
-              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
-            >
-              Boshqasini qo'shish
-            </button>
           </motion.div>
         ) : (
           <motion.div 
@@ -115,13 +99,13 @@ export default function SubscribeForm() {
             <form onSubmit={handleSubmit} className="w-full lg:w-auto flex-1 max-w-md flex flex-col gap-2 pt-2">
               <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <Input
-                type="email"
-                placeholder="Elektron pochtangiz"
-                value={email}
-                onChange={handleEmailChange}
-                disabled={loading}
-                className="flex-1 bg-background border border-border hover:border-gold/40 focus-ring rounded-[16px] px-4 py-3 h-12 text-foreground placeholder:text-muted-foreground text-sm transition-all duration-300"
-              />
+                  type="email"
+                  placeholder="Elektron pochtangiz"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  className="flex-1 bg-background border border-border hover:border-gold/40 focus-ring rounded-[16px] px-4 py-3 h-12 text-foreground placeholder:text-muted-foreground text-sm transition-all duration-300"
+                />
                 <Button
                   type="submit"
                   disabled={loading}

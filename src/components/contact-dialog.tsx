@@ -1,83 +1,64 @@
 import React, { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
 import { X, Send, CheckCircle2, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "@/lib/i18n";
-import { API_ROUTES } from "@/lib/constants";
 
 interface ContactDialogProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface FormData {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  website: string; // honeypot
-}
-
-type FormStatus = "idle" | "success" | "error";
-
-const INITIAL_FORM: FormData = {
-  name: "",
-  email: "",
-  subject: "",
-  message: "",
-  website: "",
-};
-
 export function ContactDialog({ isOpen, onClose }: ContactDialogProps) {
   const { t } = useTranslation();
-  const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+    website: "", // Honeypot
+  });
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<FormStatus>("idle");
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Lock body scroll while open
+  // Close on escape
   useEffect(() => {
-    if (!isOpen) return;
-
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
-    window.addEventListener("keydown", handleEscape);
-
+    if (isOpen) {
+      window.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden"; // Prevent scrolling behind
+    }
     return () => {
-      document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
   }, [isOpen, onClose]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleClose = () => {
-    setStatus("idle");
-    setErrorMsg("");
-    onClose();
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Honeypot: silently discard bot submissions
-    if (formData.website) {
-      setStatus("success");
-      return;
-    }
-
     setLoading(true);
     setStatus("idle");
     setErrorMsg("");
 
+    // Honeypot check
+    if (formData.website) {
+      // Quietly act like it succeeded to throw off bots
+      setTimeout(() => {
+        setLoading(false);
+        setStatus("success");
+        setFormData({ name: "", email: "", subject: "", message: "", website: "" });
+      }, 1000);
+      return;
+    }
+
     try {
-      const response = await fetch(API_ROUTES.contact, {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -94,46 +75,49 @@ export function ContactDialog({ isOpen, onClose }: ContactDialogProps) {
         throw new Error(data.error || "Xabarni yuborishda xatolik yuz berdi");
       }
 
+      setLoading(false);
       setStatus("success");
-      setFormData(INITIAL_FORM);
+      setFormData({ name: "", email: "", subject: "", message: "", website: "" });
     } catch (err: any) {
+      setLoading(false);
       setStatus("error");
       setErrorMsg(err.message || "Tizimda xatolik. Keyinroq qayta urinib ko'ring.");
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Render via Portal to escape all parent stacking contexts and animations
-  const dialogContent = (
+  return (
     <AnimatePresence>
       {isOpen && (
-        <div
+        <div 
+          className="fixed inset-0 z-50 overflow-y-auto"
           role="dialog"
           aria-modal="true"
           aria-labelledby="contact-title"
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
         >
           {/* Backdrop */}
           <motion.div
+            inherit={false}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={handleClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
           />
 
-          {/* Modal Card */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-lg bg-card border border-border/80 rounded-[28px] shadow-2xl p-6 md:p-8 z-10 text-left overflow-y-auto max-h-[90vh]"
-          >
+          {/* Flex container to center card */}
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            {/* Modal Container */}
+            <motion.div
+              inherit={false}
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="relative w-full max-w-lg bg-card border border-border/80 rounded-[28px] shadow-2xl p-6 md:p-8 overflow-hidden text-left z-10"
+            >
             {/* Close Button */}
             <button
-              onClick={handleClose}
+              onClick={onClose}
               className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground transition-colors focus-ring rounded-xl"
               aria-label="Yopish"
             >
@@ -150,7 +134,7 @@ export function ContactDialog({ isOpen, onClose }: ContactDialogProps) {
             </div>
 
             {status === "success" ? (
-              <motion.div
+              <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="py-12 text-center flex flex-col items-center"
@@ -163,15 +147,15 @@ export function ContactDialog({ isOpen, onClose }: ContactDialogProps) {
                   Tez orada siz bilan bog'lanaman. E'tiboringiz uchun rahmat!
                 </p>
                 <button
-                  onClick={handleClose}
+                  onClick={onClose}
                   className="px-6 py-2.5 bg-gold hover:bg-gold-hover text-white rounded-full text-xs font-bold uppercase tracking-wider transition-all"
                 >
                   Yopish
                 </button>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Honeypot — hidden from real users */}
+              <form onSubmit={handleSubmit} className="space-y-4 text-left">
+                {/* Honeypot field - hidden from users */}
                 <input
                   type="text"
                   name="website"
@@ -183,40 +167,61 @@ export function ContactDialog({ isOpen, onClose }: ContactDialogProps) {
                 />
 
                 {status === "error" && (
-                  <div className="p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs flex items-center gap-2">
+                  <div className="p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs flex items-center gap-2 mb-2">
                     <AlertCircle className="w-4 h-4 flex-shrink-0" />
                     <span>{errorMsg}</span>
                   </div>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    id="name"
-                    label="Ismingiz"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Ismingizni kiriting"
-                  />
-                  <FormField
-                    id="email"
-                    label="Pochtangiz"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="email@example.com"
-                  />
+                  <div className="space-y-1">
+                    <label htmlFor="name" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Ismingiz <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      required
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Ismingizni kiriting"
+                      className="w-full px-4 py-3 bg-black/5 dark:bg-white/5 border border-border/60 hover:border-border rounded-xl text-sm focus-ring outline-none transition-colors placeholder:text-muted-foreground/50"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="email" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Pochtangiz <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="email@example.com"
+                      className="w-full px-4 py-3 bg-black/5 dark:bg-white/5 border border-border/60 hover:border-border rounded-xl text-sm focus-ring outline-none transition-colors placeholder:text-muted-foreground/50"
+                    />
+                  </div>
                 </div>
 
-                <FormField
-                  id="subject"
-                  label="Mavzu"
-                  required
-                  value={formData.subject}
-                  onChange={handleChange}
-                  placeholder="Xabar mavzusi"
-                />
+                <div className="space-y-1">
+                  <label htmlFor="subject" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Mavzu <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="subject"
+                    name="subject"
+                    required
+                    value={formData.subject}
+                    onChange={handleChange}
+                    placeholder="Xabar mavzusi"
+                    className="w-full px-4 py-3 bg-black/5 dark:bg-white/5 border border-border/60 hover:border-border rounded-xl text-sm focus-ring outline-none transition-colors placeholder:text-muted-foreground/50"
+                  />
+                </div>
 
                 <div className="space-y-1">
                   <label htmlFor="message" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -252,41 +257,8 @@ export function ContactDialog({ isOpen, onClose }: ContactDialogProps) {
             )}
           </motion.div>
         </div>
+      </div>
       )}
     </AnimatePresence>
-  );
-
-  // Portal ensures dialog escapes any parent transform/filter/opacity stacking contexts
-  return createPortal(dialogContent, document.body);
-}
-
-// ─── Small reusable text input field ─────────────────────────────────────────
-interface FormFieldProps {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  type?: string;
-  required?: boolean;
-}
-
-function FormField({ id, label, value, onChange, placeholder, type = "text", required }: FormFieldProps) {
-  return (
-    <div className="space-y-1">
-      <label htmlFor={id} className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <input
-        type={type}
-        id={id}
-        name={id}
-        required={required}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full px-4 py-3 bg-black/5 dark:bg-white/5 border border-border/60 hover:border-border rounded-xl text-sm focus-ring outline-none transition-colors placeholder:text-muted-foreground/50"
-      />
-    </div>
   );
 }
