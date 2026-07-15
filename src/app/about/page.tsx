@@ -143,7 +143,7 @@ export default function AboutPage() {
         <div className="md:col-span-5 flex justify-center">
           <div className="w-full max-w-[280px] aspect-[3/4] rounded-[24px] overflow-hidden border border-border p-2 bg-white shadow-sm relative">
             <img 
-              src="/portrait.png" 
+              src="/portrait_about.png" 
               alt="Akbarali Sottorov Portrait" 
               className="w-full h-full object-cover rounded-[18px] grayscale" 
               loading="lazy"
