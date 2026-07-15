@@ -2,12 +2,13 @@ import { describe, test, expect, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useTranslation, translations } from '../lib/i18n';
 
-// Mock useParams from react-router-dom
+// Mock react-router-dom hooks
 vi.mock('react-router-dom', () => ({
   useParams: vi.fn(),
+  useLocation: vi.fn(() => ({ pathname: "/" })),
 }));
 
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 
 describe('Internationalization System', () => {
   test('should fallback to uz language when no param is specified', () => {

@@ -3,6 +3,8 @@ import { Send, CheckCircle2, AlertCircle, Mail } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { motion, AnimatePresence } from "motion/react";
+import { API_ROUTES } from "@/lib/constants";
+
 
 export default function SubscribeForm() {
   const [email, setEmail] = useState("");
@@ -10,9 +12,17 @@ export default function SubscribeForm() {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (status === "error") {
+      setStatus("idle");
+      setMessage("");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email.trim()) return;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -26,7 +36,7 @@ export default function SubscribeForm() {
     setMessage("");
 
     try {
-      const res = await fetch("/api/subscribe", {
+      const res = await fetch(API_ROUTES.subscribe, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -41,13 +51,14 @@ export default function SubscribeForm() {
         setStatus("error");
         setMessage(data.error || "Xatolik yuz berdi. Iltimos qaytadan urunib ko'ring.");
       }
-    } catch (err) {
+    } catch {
       setStatus("error");
       setMessage("Tarmoqda xatolik yuz berdi. Ulanishni tekshiring.");
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="w-full bg-white dark:bg-card border border-border rounded-[24px] p-8 md:p-12 shadow-sm text-left relative overflow-hidden">
@@ -68,9 +79,17 @@ export default function SubscribeForm() {
               <CheckCircle2 className="w-6 h-6 animate-pulse" />
             </div>
             <h3 className="font-heading font-extrabold text-2xl text-foreground mb-2">Obuna muvaffaqiyatli yakunlandi!</h3>
-            <p className="font-sans text-muted-foreground text-base max-w-md leading-relaxed">
+            <p className="font-sans text-muted-foreground text-base max-w-md leading-relaxed mb-6">
               Rahmat! Siz Akbarali Sottorovning marketing, brending va shaxsiy rivojlanish haqidagi tahlillariga muvaffaqiyatli obuna bo'ldingiz. Har ikki haftada yakshanba tongida xabarlarni pochtangizda kuting.
             </p>
+            <button
+              type="button"
+              onClick={() => setStatus("idle")}
+              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors cursor-pointer"
+            >
+              Boshqa pochtani qo'shish
+            </button>
+
           </motion.div>
         ) : (
           <motion.div 
@@ -102,7 +121,7 @@ export default function SubscribeForm() {
                   type="email"
                   placeholder="Elektron pochtangiz"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={handleEmailChange}
                   disabled={loading}
                   className="flex-1 bg-background border border-border hover:border-gold/40 focus-ring rounded-[16px] px-4 py-3 h-12 text-foreground placeholder:text-muted-foreground text-sm transition-all duration-300"
                 />

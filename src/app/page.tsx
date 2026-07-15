@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import Hero from "@/components/hero";
@@ -17,110 +17,83 @@ import {
 import { FadeIn, StaggerContainer, StaggerItem, CountUp } from "@/components/animations";
 import { useTranslation } from "@/lib/i18n";
 import { ContactDialog } from "@/components/contact-dialog";
+import { useHomeData } from "@/lib/use-home-data";
 
-export default function Page() {
-  const { t, currentLang, langPrefix } = useTranslation();
-  const [isContactOpen, setIsContactOpen] = useState(false);
-  const [articles, setArticles] = useState<any[]>([]);
-  const [books, setBooks] = useState<any[]>([]);
-  const [errorInfo, setErrorInfo] = useState<string | null>(null);
+// ─── Static Projects Data ───────────────────────────────────────────────────
+const PROJECTS = [
+  {
+    title: "Tax Helper",
+    slug: "tax-helper",
+    status: "Hozirda qurilmoqda",
+    statusColor: "bg-gold/15 text-gold border-gold/25",
+    motivation: "O'zbekistondagi mustaqil ijodkorlar va frilanserlar uchun soliq qonunchiligi o'ta chigal bo'lib, xatoliklar katta jarimalarga sabab bo'lardi. Men bu jarayonni hamma uchun oson va xavfsiz qilmoqchi bo'ldim.",
+    problem: "Kichik biznes va yakka tartibdagi tadbirkorlar uchun soliq majburiyatlarini tezkor hisoblash va qonuniy imtiyozlarni aniqlash imkoni yo'qligi.",
+    process: "AI yordamida soliq kodeksini tahlil qiluvchi maxsus bot modelini yozdik, Prisma va PostgreSQL bazasini ulab, soliq kalkulyatorini integratsiya qildik.",
+    result: "Hozirda sinov rejimida 200 dan ortiq faol foydalanuvchilar o'z soliq hisobotlarini 5 daqiqa ichida xatosiz topshirdilar.",
+    lessons: "Qonunlar tez-tez o'zgarib turadi, shuning uchun eng asosiysi — AI bilim bazasini real vaqtda yangilab boradigan avtomatlashtirilgan sinxronizatsiya ekanligini angladim.",
+    techStack: ["Next.js", "OpenAI API", "TypeScript", "Tailwind CSS", "Prisma"],
+    website: "https://taxhelper.uz",
+    github: "https://github.com/akbaralisottorov/tax-helper-ai",
+    caseStudy: "/#projects",
+    image: "/project_tax_helper.png",
+    cta: "Soliq assistentini sinab ko'rish"
+  },
+  {
+    title: "Teran Fikr",
+    slug: "teran-fikr",
+    status: "Tugallangan",
+    statusColor: "bg-success/15 text-success border-success/25",
+    motivation: "Uzbek internet segmentida yuzaki xabarlar ko'p, biroq chuqur, dalillarga tayangan va odamni mushohada qilishga chorlaydigan tahlillar yo'q darajada edi.",
+    problem: "O'quvchilar uchun reklamasiz, shoshilmasdan chuqur maqolalarni mutolaa qilish imkonini beruvchi intellektual tahliliy platformaning yetishmasligi.",
+    process: "Faqat matn va o'qish qulayligiga qaratilgan premium tipografiyali dizayn tizimi yaratdim va uni Express/React backend tizimi bilan birlashtirdim.",
+    result: "Sifatli auditoriya shakllandi, har bir tashrif buyuruvchining platformadagi o'rtacha mutolaa vaqti 6 daqiqadan oshdi.",
+    lessons: "Raqamli shovqin asrida odamlar baribir sifatli va chuqur matnlarni qidirishini, chiroyli va sokin muhit unga bo'lgan ishtiyoqni oshirishini tushundim.",
+    techStack: ["React", "Tailwind CSS", "PostgreSQL", "Node.js", "Express"],
+    website: "https://teranfikr.uz",
+    github: "https://github.com/akbaralisottorov/teran-fikr",
+    caseStudy: "/#projects",
+    image: "/project_teran_fikr.png",
+    cta: "Tahlillar platformasiga o'tish"
+  },
+  {
+    title: "PIO Pay",
+    slug: "pio-pay",
+    status: "Tugallangan",
+    statusColor: "bg-success/15 text-success border-success/25",
+    motivation: "O'zim frilansirlik qilganimda xalqaro mijozlardan haq to'lashdagi murakkab to'siqlar va ulkan komissiyalarga duch kelgan edim. Bu muammoni hal qilish zarur edi.",
+    problem: "Markaziy Osiyodagi frilanserlar uchun xalqaro to'lovlarni qabul qilishdagi yuqori komissiyalar va tranzaksiya muddatlarining uzoqligi.",
+    process: "Stripe to'lov shlyuzi bilan bevosita integratsiya ishlab chiqildi va tranzaksiyalar yo'nalishini optimallashtiradigan maxsus marshrutlash algoritmi joriy etildi.",
+    result: "Tranzaksiya komissiyalari o'rtacha 1% gacha pasaytirildi va pul o'tkazish muddatlari 24 soatgacha qisqardi.",
+    lessons: "Moliyaviy mahsulotlar yaratishda API barqarorligi va tranzaksiyalarning xavfsizligi eng birinchi o'rindagi muhim ustuvorlik ekanligi o'z isbotini topdi.",
+    techStack: ["Next.js", "Stripe", "TypeScript", "Tailwind CSS"],
+    website: "https://piopay.com",
+    github: "https://github.com/akbaralisottorov/pio-pay",
+    caseStudy: "/#projects",
+    image: "/project_pio_pay.png",
+    cta: "To'lov tizimini tahlil qilish"
+  },
+  {
+    title: "HRAkso AI",
+    slug: "hraksso-ai",
+    status: "Tugallangan",
+    statusColor: "bg-success/15 text-success border-success/25",
+    motivation: "Kompaniyalar nomzodlarni tanlashda faqat quruq rezyumega suyanib, ularning haqiqiy kognitiv qobiliyatlari va jamoaviy qadriyatlarga mosligini ko'rmas edilar.",
+    problem: "Katta hajmdagi arizalarni saralashdagi subyektivlik va kognitiv empatiya darajasini rezyume orqali aniqlab bo'lmasligi.",
+    process: "Nomzodlarning javoblarini kognitiv va xulq-atvor dinamikasi bo'yicha tahlil qiluvchi neyrotizim modellarini Python FastAPI yordamida yozdik.",
+    result: "Dastlabki filtrlash jarayoni tezligi 70% ga oshdi va jamoada qolish ko'rsatkichi yaxshilandi.",
+    lessons: "Sun'iy intellekt faqatgina insoniy qarorlar uchun ko'makchi ekanini, yakuniy tanlovda esa baribir shaxsiy suhbat va hissiy intellekt muhimligini angladim.",
+    techStack: ["React", "Python", "FastAPI", "Tailwind CSS"],
+    website: "https://hraksso.ai",
+    github: "https://github.com/akbaralisottorov/hraksso-ai",
+    caseStudy: "/#projects",
+    image: "/project_hraksso_ai.png",
+    cta: "Baholash tizimi demosini sinash"
+  }
+];
 
-  useEffect(() => {
-    fetch('/api/articles')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setArticles(data);
-        } else if (data.error) {
-          setErrorInfo(data.details || data.error);
-        }
-      })
-      .catch(e => setErrorInfo(String(e)));
-
-    fetch('/api/books')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setBooks(data);
-        }
-      })
-      .catch(console.error);
-  }, []);
-
-  // Case Studies
-  const projects = [
-    {
-      title: "Tax Helper",
-      slug: "tax-helper",
-      status: "Hozirda qurilmoqda",
-      statusColor: "bg-gold/15 text-gold border-gold/25",
-      motivation: "O'zbekistondagi mustaqil ijodkorlar va frilanserlar uchun soliq qonunchiligi o'ta chigal bo'lib, xatoliklar katta jarimalarga sabab bo'lardi. Men bu jarayonni hamma uchun oson va xavfsiz qilmoqchi bo'ldim.",
-      problem: "Kichik biznes va yakka tartibdagi tadbirkorlar uchun soliq majburiyatlarini tezkor hisoblash va qonuniy imtiyozlarni aniqlash imkoni yo'qligi.",
-      process: "AI yordamida soliq kodeksini tahlil qiluvchi maxsus bot modelini yozdik, Prisma va PostgreSQL bazasini ulab, soliq kalkulyatorini integratsiya qildik.",
-      result: "Hozirda sinov rejimida 200 dan ortiq faol foydalanuvchilar o'z soliq hisobotlarini 5 daqiqa ichida xatosiz topshirdilar.",
-      lessons: "Qonunlar tez-tez o'zgarib turadi, shuning uchun eng asosiysi — AI bilim bazasini real vaqtda yangilab boradigan avtomatlashtirilgan sinxronizatsiya ekanligini angladim.",
-      techStack: ["Next.js", "OpenAI API", "TypeScript", "Tailwind CSS", "Prisma"],
-      website: "https://taxhelper.uz",
-      github: "https://github.com/akbaralisottorov/tax-helper-ai",
-      caseStudy: "/#projects",
-      image: "/project_tax_helper.png",
-      cta: "Soliq assistentini sinab ko'rish"
-    },
-    {
-      title: "Teran Fikr",
-      slug: "teran-fikr",
-      status: "Tugallangan",
-      statusColor: "bg-success/15 text-success border-success/25",
-      motivation: "Uzbek internet segmentida yuzaki xabarlar ko'p, biroq chuqur, dalillarga tayangan va odamni mushohada qilishga chorlaydigan tahlillar yo'q darajada edi.",
-      problem: "O'quvchilar uchun reklamasiz, shoshilmasdan chuqur maqolalarni mutolaa qilish imkonini beruvchi intellektual tahliliy platformaning yetishmasligi.",
-      process: "Faqat matn va o'qish qulayligiga qaratilgan premium tipografiyali dizayn tizimi yaratdim va uni Express/React backend tizimi bilan birlashtirdim.",
-      result: "Sifatli auditoriya shakllandi, har bir tashrif buyuruvchining platformadagi o'rtacha mutolaa vaqti 6 daqiqadan oshdi.",
-      lessons: "Raqamli shovqin asrida odamlar baribir sifatli va chuqur matnlarni qidirishini, chiroyli va sokin muhit unga bo'lgan ishtiyoqni oshirishini tushundim.",
-      techStack: ["React", "Tailwind CSS", "PostgreSQL", "Node.js", "Express"],
-      website: "https://teranfikr.uz",
-      github: "https://github.com/akbaralisottorov/teran-fikr",
-      caseStudy: "/#projects",
-      image: "/project_teran_fikr.png",
-      cta: "Tahlillar platformasiga o'tish"
-    },
-    {
-      title: "PIO Pay",
-      slug: "pio-pay",
-      status: "Tugallangan",
-      statusColor: "bg-success/15 text-success border-success/25",
-      motivation: "O'zim frilansirlik qilganimda xalqaro mijozlardan haq to'lashdagi murakkab to'siqlar va ulkan komissiyalarga duch kelgan edim. Bu muammoni hal qilish zarur edi.",
-      problem: "Markaziy Osiyodagi frilanserlar uchun xalqaro to'lovlarni qabul qilishdagi yuqori komissiyalar va tranzaksiya muddatlarining uzoqligi.",
-      process: "Stripe to'lov shlyuzi bilan bevosita integratsiya ishlab chiqildi va tranzaksiyalar yo'nalishini optimallashtiradigan maxsus marshrutlash algoritmi joriy etildi.",
-      result: "Tranzaksiya komissiyalari o'rtacha 1% gacha pasaytirildi va pul o'tkazish muddatlari 24 soatgacha qisqardi.",
-      lessons: "Moliyaviy mahsulotlar yaratishda API barqarorligi va tranzaksiyalarning xavfsizligi eng birinchi o'rindagi muhim ustuvorlik ekanligi o'z isbotini topdi.",
-      techStack: ["Next.js", "Stripe", "TypeScript", "Tailwind CSS"],
-      website: "https://piopay.com",
-      github: "https://github.com/akbaralisottorov/pio-pay",
-      caseStudy: "/#projects",
-      image: "/project_pio_pay.png",
-      cta: "To'lov tizimini tahlil qilish"
-    },
-    {
-      title: "HRAkso AI",
-      slug: "hraksso-ai",
-      status: "Tugallangan",
-      statusColor: "bg-success/15 text-success border-success/25",
-      motivation: "Kompaniyalar nomzodlarni tanlashda faqat quruq rezyumega suyanib, ularning haqiqiy kognitiv qobiliyatlari va jamoaviy qadriyatlarga mosligini ko'rmas edilar.",
-      problem: "Katta hajmdagi arizalarni saralashdagi subyektivlik va kognitiv empatiya darajasini rezyume orqali aniqlab bo'lmasligi.",
-      process: "Nomzodlarning javoblarini kognitiv va xulq-atvor dinamikasi bo'yicha tahlil qiluvchi neyrotizim modellarini Python FastAPI yordamida yozdik.",
-      result: "Dastlabki filtrlash jarayoni tezligi 70% ga oshdi va jamoada qolish ko'rsatkichi yaxshilandi.",
-      lessons: "Sun'iy intellekt faqatgina insoniy qarorlar uchun ko'makchi ekanini, yakuniy tanlovda esa baribir shaxsiy suhbat va hissiy intellekt muhimligini angladim.",
-      techStack: ["React", "Python", "FastAPI", "Tailwind CSS"],
-      website: "https://hraksso.ai",
-      github: "https://github.com/akbaralisottorov/hraksso-ai",
-      caseStudy: "/#projects",
-      image: "/project_hraksso_ai.png",
-      cta: "Baholash tizimi demosini sinash"
-    }
-  ];
-
-  const localizedProjects = projects.map(p => {
-    if (currentLang === "en") {
+function getLocalizedProjects(lang: string) {
+  return PROJECTS.map(p => {
+    if (lang === "en") {
       if (p.slug === "tax-helper") {
         return {
           ...p,
@@ -169,7 +142,7 @@ export default function Page() {
           cta: "Try Assessment System Demo"
         };
       }
-    } else if (currentLang === "ru") {
+    } else if (lang === "ru") {
       if (p.slug === "tax-helper") {
         return {
           ...p,
@@ -186,11 +159,11 @@ export default function Page() {
         return {
           ...p,
           status: "Завершено",
-          motivation: "В узбекском сегменте интернета много поверхностных новостей, но качественная аналитика на основе фактов практически отсутствовала.",
-          problem: "Нехватка интеллектуальной аналитической платформы без рекламы и спешки для вдумчивого чтения эссе.",
-          process: "Создал дизайн-систему с фокусом на премиальную типографику и интегрировал ее с бэкендом Express/React.",
-          result: "Сформировалась качественная аудитория, среднее время чтения одного посетителя превысило 6 минут.",
-          lessons: "В эпоху цифрового шума люди все еще ищут глубокие тексты, а красивая и спокойная обстановка усиливает этот интерес.",
+          motivation: "В узбекском сегменте интернета много поверхностных новостей, но качественная аналитика на основе фактов практически оставалась незаметной.",
+          problem: "Нехватка аналитической платформы для вдумчивого чтения глубоких текстов без рекламы и спешки.",
+          process: "Создал элегантную дизайн-систему и объединил ее с бэкендом Express/React.",
+          result: "Сформировалась качественная аудитория, среднее время чтения превысило 6 минут.",
+          lessons: "Люди все еще ценят глубокий контент в эпоху цифрового шума, если предоставить им спокойную среду.",
           cta: "Перейти на платформу аналитики"
         };
       }
@@ -221,12 +194,21 @@ export default function Page() {
     }
     return p;
   });
+}
+
+export default function Page() {
+  const { t, currentLang, langPrefix } = useTranslation();
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const { articles, books, error } = useHomeData();
+
+  const localizedProjects = getLocalizedProjects(currentLang);
 
   const defaultFeaturedArticle = {
     title: "Tanlov psixologiyasi: Nima uchun biz sotib olamiz?",
     category: "Xulq-atvor iqtisodiyoti",
     createdAt: new Date().toISOString(),
     excerpt: "Kognitiv og'ishlar, tanlov arxitekturasi va brendlar iste'molchi qarorlariga ta'sir qilish uchun 'System 1' fikrlashidan qanday foydalanishi to'g'risida ilmiy tahlil.",
+    content: "",
     coverImage: "/featured_cover.png",
     slug: "psychology-of-choice",
     readTime: "8 daqiqa",
@@ -637,9 +619,9 @@ export default function Page() {
           </p>
         </FadeIn>
 
-        {errorInfo ? (
-          <div className="bg-destructive/10 border border-destructive/20 rounded-[20px] p-6 text-destructive-foreground text-sm">
-            {currentLang === "en" ? "Database connection error:" : currentLang === "ru" ? "Ошибка подключения к базе данных:" : "Ma'lumotlar bazasiga ulanishda xatolik:"} {errorInfo}
+        {error ? (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-[20px] p-6 text-destructive-foreground text-sm text-left">
+            {currentLang === "en" ? "Database connection error:" : currentLang === "ru" ? "Ошибка подключения к базе данных:" : "Ma'lumotlar bazasiga ulanishda xatolik:"} {error}
           </div>
         ) : articles.length === 0 ? (
           <div className="bg-white dark:bg-card border border-border rounded-[24px] p-12 text-center text-muted-foreground">

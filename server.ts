@@ -15,6 +15,28 @@ import { getEmbedding } from "./src/lib/openai.js";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
+// Auto-seed default admin user if no users exist
+const seedDefaultUser = async () => {
+  try {
+    const count = await prisma.user.count();
+    if (count === 0) {
+      const defaultEmail = process.env.ADMIN_EMAIL || "admin@alisot.uz";
+      await prisma.user.create({
+        data: {
+          email: defaultEmail,
+          name: "Akbarali Sottorov",
+        },
+      });
+      console.log(`✅ Default admin user seeded: ${defaultEmail}`);
+    }
+  } catch (e) {
+    console.warn("Could not seed default user (expected in serverless):", e);
+  }
+};
+
+seedDefaultUser();
+
+
 const app = express();
 
 // Strict Security Headers
@@ -77,6 +99,21 @@ function getCookie(req: any, name: string): string | null {
   return null;
 }
 
+// DRY async route handler — eliminates repetitive try/catch blocks
+const asyncHandler = (fn: (req: any, res: any) => Promise<any>) =>
+  async (req: any, res: any) => {
+    try {
+      await fn(req, res);
+    } catch (e: any) {
+      console.error(`[${req.method} ${req.path}]`, e?.message || e);
+      res.status(500).json({
+        error: "Internal Server Error",
+        details: process.env.NODE_ENV !== "production" ? (e.message || String(e)) : undefined,
+      });
+    }
+  };
+
+
 // Authentication middleware
 const authMiddleware = (req: any, res: any, next: any) => {
   const token = getCookie(req, "admin_token");
@@ -99,6 +136,17 @@ if (!fs.existsSync(uploadDir)) {
     console.warn("Could not create upload directory (expected in serverless environments):", err);
   }
 }
+
+// Create data directory for non-public files
+const dataDir = path.join(process.cwd(), "data");
+if (!fs.existsSync(dataDir)) {
+  try {
+    fs.mkdirSync(dataDir, { recursive: true });
+  } catch (err) {
+    console.warn("Could not create data directory:", err);
+  }
+}
+
 
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -256,7 +304,7 @@ app.post("/api/contact", async (req, res) => {
       createdAt: new Date().toISOString()
     };
 
-    const contactLogPath = path.join(process.cwd(), "public/uploads/contact_messages.json");
+    const contactLogPath = path.join(process.cwd(), "data/contact_messages.json");
     let messages = [];
     if (fs.existsSync(contactLogPath)) {
       try {
@@ -560,6 +608,13 @@ app.post("/api/admin/articles", async (req, res) => {
   }
 });
 
+// GET single article (for edit page — avoids race condition with list)
+app.get("/api/admin/articles/:id", authMiddleware, asyncHandler(async (req, res) => {
+  const article = await ArticleRepository.getArticleById(req.params.id);
+  if (!article) return res.status(404).json({ error: "Article not found" });
+  res.json(article);
+}));
+
 app.put("/api/admin/articles/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -585,15 +640,10 @@ app.delete("/api/admin/articles/:id", async (req, res) => {
   }
 });
 
-app.get("/api/users", async (req, res) => {
-  try {
-    const users = await UserRepository.getAllUsers();
-    res.json(users);
-  } catch (e: any) {
-    console.log("Error:", e?.message || e);
-    res.status(500).json({ error: "Failed to fetch users", details: e.message || String(e) });
-  }
-});
+app.get("/api/users", authMiddleware, asyncHandler(async (req, res) => {
+  const users = await UserRepository.getAllUsers();
+  res.json(users);
+}));
 
 app.get("/api/admin/analytics", async (req, res) => {
   try {

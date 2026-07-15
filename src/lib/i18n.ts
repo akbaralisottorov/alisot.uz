@@ -134,6 +134,12 @@ export const translations = {
       reading: "O'qilmoqda",
       building: "Qurilmoqda",
       connect: "Aloqada bo'ling"
+    },
+    articlePage: {
+      back: "Barcha maqolalar",
+      author: "Muallif",
+      readTime: "daqiqa o'qish",
+      loading: "Maqola yuklanmoqda..."
     }
   },
   en: {
@@ -259,6 +265,20 @@ export const translations = {
       title: "Page Not Found",
       desc: "The page you are looking for does not exist or has been moved to another address.",
       cta: "Return to Home"
+    },
+    footer: {
+      desc: "By deeply analyzing human nature, cognitive psychology, and technology, I create solutions that bring simplicity to people's lives. This website is my digital shelter and repository of thoughts.",
+      rights: "All rights reserved.",
+      status: "Status: Current focus",
+      reading: "Reading",
+      building: "Building",
+      connect: "Stay connected"
+    },
+    articlePage: {
+      back: "Back to essays",
+      author: "Author",
+      readTime: "min read",
+      loading: "Loading essay..."
     }
   },
   ru: {
@@ -384,6 +404,20 @@ export const translations = {
       title: "Страница не найдена",
       desc: "Страница, которую вы ищете, не существует или была перенесена по другому адресу.",
       cta: "Вернуться на главную"
+    },
+    footer: {
+      desc: "Глубоко анализируя человеческую природу, когнитивную психологию и технологии, я создаю решения, приносящие простоту в жизнь людей. Этот сайт — мое цифровое убежище и хранилище мыслей.",
+      rights: "Все права защищены.",
+      status: "Статус: Текущие занятия",
+      reading: "Читаю",
+      building: "Строю",
+      connect: "Будьте на связи"
+    },
+    articlePage: {
+      back: "Назад к статьям",
+      author: "Автор",
+      readTime: "мин чтения",
+      loading: "Загрузка статьи..."
     }
   }
 };

@@ -1,17 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, ArrowLeft, BarChart3, FileText, Users } from "lucide-react";
 import ArticleForm from "./ArticleForm";
 import { AnalyticsDashboard } from "@/components/analytics-dashboard";
+import { API_ROUTES, ArticleStatus } from "@/lib/constants";
+
+interface Article {
+  id: string;
+  title: string;
+  slug: string;
+  status: ArticleStatus;
+  featured: boolean;
+  createdAt: string;
+  authorId: string;
+  excerpt?: string;
+  content?: string;
+  coverImage?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+}
+
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [password, setPassword] = useState("");
-  const [articles, setArticles] = useState([]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [editArticle, setEditArticle] = useState<Article | null>(null);
+  const [loadingEdit, setLoadingEdit] = useState(false);
   const [loading, setLoading] = useState(true);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"content" | "analytics" | "subscribers">("analytics");
@@ -24,42 +43,49 @@ export default function AdminDashboard() {
 
   const isEditing = location.pathname.includes("/edit");
   const isCreating = location.pathname.includes("/new");
+  const editArticleId = isEditing ? location.pathname.split("/")[3] : null;
   
   // Verify auth session on mount
   useEffect(() => {
-    fetch("/api/admin/articles")
-      .then(res => {
-        if (res.status === 200) {
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-        }
-      })
+    fetch(API_ROUTES.admin.articles)
+      .then((res) => setIsAuthenticated(res.status === 200))
       .catch(() => setIsAuthenticated(false))
       .finally(() => setCheckingAuth(false));
   }, []);
 
   const fetchArticles = async () => {
     try {
-      const res = await fetch("/api/admin/articles");
+      const res = await fetch(API_ROUTES.admin.articles);
       if (res.status === 401) {
         setIsAuthenticated(false);
         return;
       }
       const data = await res.json();
       if (Array.isArray(data)) {
-        setArticles(data);
+        setArticles(data as Article[]);
       } else {
-        setErrorInfo(data?.details || data?.error || "Unknown error");
-        setArticles([]);
+        setErrorInfo(data?.details || data?.error || "Noma'lum xatolik");
       }
     } catch (e: any) {
       setErrorInfo(String(e));
-      setArticles([]);
     } finally {
       setLoading(false);
     }
   };
+
+  // Fetch single article for editing (avoids race condition with list)
+  useEffect(() => {
+    if (!isAuthenticated || !isEditing || !editArticleId) return;
+    setLoadingEdit(true);
+    fetch(`${API_ROUTES.admin.articles}/${editArticleId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) navigate("/admin");
+        else setEditArticle(data as Article);
+      })
+      .catch(() => navigate("/admin"))
+      .finally(() => setLoadingEdit(false));
+  }, [isAuthenticated, isEditing, editArticleId]);
 
   useEffect(() => {
     if (isAuthenticated && !isEditing && !isCreating) {
@@ -180,31 +206,25 @@ export default function AdminDashboard() {
   }
 
   if (isCreating || isEditing) {
-    const articleId = isEditing ? location.pathname.split("/")[3] : null;
-    const initialData = isEditing ? articles.find((a: any) => a.id === articleId) : null;
-    
-    if (isEditing && !initialData && !loading) {
-      navigate("/admin");
-      return null;
-    }
-
     return (
-      <div className="w-full max-w-5xl mx-auto p-6 bg-card/30 border border-border/60 rounded-2xl my-8 backdrop-blur-sm">
+      <div className="w-full max-w-5xl mx-auto p-6 bg-card/30 border border-border/60 rounded-2xl my-8 backdrop-blur-sm text-left">
         <div className="flex items-center gap-4 mb-8">
           <Button variant="ghost" onClick={() => navigate("/admin")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            Orqaga
           </Button>
           <h1 className="text-2xl font-bold font-heading bg-clip-text text-transparent bg-gradient-to-r from-foreground to-muted-foreground">
-            {isEditing ? "Edit Article" : "Create New Article"}
+            {isEditing ? "Maqolani tahrirlash" : "Yangi maqola yaratish"}
           </h1>
         </div>
         
-        {loading && isEditing ? (
-          <div>Loading...</div>
+        {isEditing && loadingEdit ? (
+          <div className="flex justify-center py-20">
+            <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+          </div>
         ) : (
           <ArticleForm 
-            initialData={initialData} 
+            initialData={isEditing ? (editArticle ?? undefined) : undefined} 
             onSuccess={() => navigate("/admin")} 
           />
         )}

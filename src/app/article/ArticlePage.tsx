@@ -6,10 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { useReadingProgress } from "@/lib/use-reading-progress";
 import { FadeIn } from "@/components/animations";
 
+import { useTranslation } from "@/lib/i18n";
+
 export default function ArticlePage() {
   const { slug } = useParams();
   const [article, setArticle] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { t, langPrefix, currentLang } = useTranslation();
 
   const progress = useReadingProgress(article?.title || "", "article");
 
@@ -29,8 +32,8 @@ export default function ArticlePage() {
 
   if (loading) {
     return (
-      <div className="w-full max-w-4xl mx-auto p-6 min-h-[50vh] flex justify-center items-center font-sans font-medium text-muted-foreground">
-        Maqola yuklanmoqda...
+      <div className="w-full max-w-4xl mx-auto p-6 min-h-[50vh] flex justify-center items-center font-sans font-medium text-muted-foreground text-left">
+        {t("articlePage.loading")}
       </div>
     );
   }
@@ -38,9 +41,11 @@ export default function ArticlePage() {
   if (!article) {
     return (
       <div className="w-full max-w-2xl mx-auto p-6 min-h-[50vh] flex flex-col justify-center items-center text-center">
-        <h1 className="font-heading text-2xl font-bold text-foreground mb-4">Maqola topilmadi</h1>
-        <Link to="/" className="px-6 py-2.5 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary/95 transition-all inline-flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4" /> Bosh sahifaga qaytish
+        <h1 className="font-heading text-2xl font-bold text-foreground mb-4">
+          {currentLang === "en" ? "Article not found" : currentLang === "ru" ? "Статья не найдена" : "Maqola topilmadi"}
+        </h1>
+        <Link to={`${langPrefix}/`} className="px-6 py-2.5 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary/95 transition-all inline-flex items-center gap-2">
+          <ArrowLeft className="w-4 h-4" /> {t("notfound.cta")}
         </Link>
       </div>
     );
@@ -69,20 +74,24 @@ export default function ArticlePage() {
       />
       
       <FadeIn>
-        <Link to="/#writing" className="inline-flex items-center text-sm font-semibold text-muted-foreground hover:text-gold mb-12 transition-colors">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Barcha maqolalar
+        <Link to={`${langPrefix}/#writing`} className="inline-flex items-center text-sm font-semibold text-muted-foreground hover:text-gold mb-12 transition-colors">
+          <ArrowLeft className="w-4 h-4 mr-2" /> {t("articlePage.back")}
         </Link>
 
         {/* Article Meta */}
         <div className="flex flex-wrap items-center gap-4 text-xs text-muted font-medium mb-6">
           <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5" />
-            <span>{new Date(article.createdAt).toLocaleDateString("uz-UZ")}</span>
+            <span>
+              {new Date(article.createdAt).toLocaleDateString(
+                currentLang === "en" ? "en-US" : currentLang === "ru" ? "ru-RU" : "uz-UZ"
+              )}
+            </span>
           </div>
           <span className="w-1.5 h-1.5 rounded-full bg-border" />
           <div className="flex items-center gap-1.5">
             <User className="w-3.5 h-3.5" />
-            <span>Muallif: {article.author?.name || "Akbarali Sottorov"}</span>
+            <span>{t("articlePage.author")}: {article.author?.name || "Akbarali Sottorov"}</span>
           </div>
           <span className="w-1.5 h-1.5 rounded-full bg-border" />
           <div className="flex items-center gap-1.5">
@@ -92,7 +101,7 @@ export default function ArticlePage() {
                 const cleanText = article.content.replace(/<\/?[^>]+(>|$)/g, "");
                 const words = cleanText.trim().split(/\s+/).filter(Boolean).length;
                 const minutes = Math.ceil(words / 200);
-                return `${minutes} daqiqa o'qish`;
+                return `${minutes} ${t("articlePage.readTime")}`;
               })()}
             </span>
           </div>
