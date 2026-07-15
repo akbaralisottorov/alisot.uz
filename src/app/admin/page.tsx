@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, ArrowLeft, BarChart3, FileText, Users } from "lucide-react";
+import { Plus, Edit, Trash2, ArrowLeft, BarChart3, FileText, Users, Shield, RefreshCw } from "lucide-react";
 import ArticleForm from "./ArticleForm";
 import { AnalyticsDashboard } from "@/components/analytics-dashboard";
 import { API_ROUTES, ArticleStatus } from "@/lib/constants";
@@ -33,11 +33,20 @@ export default function AdminDashboard() {
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [loading, setLoading] = useState(true);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"content" | "analytics" | "subscribers">("analytics");
+  const [activeTab, setActiveTab] = useState<"content" | "analytics" | "subscribers" | "security">("analytics");
   const [subscribers, setSubscribers] = useState<any[]>([]);
   const [loadingSubs, setLoadingSubs] = useState(false);
   const [subQuery, setSubQuery] = useState("");
   
+  // Captcha states
+  const [captchaQuestion, setCaptchaQuestion] = useState("");
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
+  const [challengeToken, setChallengeToken] = useState("");
+  const [loadingChallenge, setLoadingChallenge] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [securityLogs, setSecurityLogs] = useState<any[]>([]);
+  const [loadingLogs, setLoadingLogs] = useState(false);
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -45,11 +54,36 @@ export default function AdminDashboard() {
   const isCreating = location.pathname.includes("/new");
   const editArticleId = isEditing ? location.pathname.split("/")[3] : null;
   
+  const fetchChallenge = async () => {
+    setLoadingChallenge(true);
+    try {
+      const res = await fetch(API_ROUTES.admin.challenge);
+      if (res.ok) {
+        const data = await res.json();
+        setCaptchaQuestion(data.question);
+        setChallengeToken(data.challengeToken);
+      }
+    } catch (e) {
+      console.error("Failed to fetch captcha challenge", e);
+    } finally {
+      setLoadingChallenge(false);
+    }
+  };
+
   // Verify auth session on mount
   useEffect(() => {
     fetch(API_ROUTES.admin.articles)
-      .then((res) => setIsAuthenticated(res.status === 200))
-      .catch(() => setIsAuthenticated(false))
+      .then((res) => {
+        const authed = res.status === 200;
+        setIsAuthenticated(authed);
+        if (!authed) {
+          fetchChallenge();
+        }
+      })
+      .catch(() => {
+        setIsAuthenticated(false);
+        fetchChallenge();
+      })
       .finally(() => setCheckingAuth(false));
   }, []);
 
@@ -170,21 +204,27 @@ export default function AdminDashboard() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginLoading(true);
     try {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password })
+        body: JSON.stringify({ password, captchaAnswer, challengeToken })
       });
       if (res.ok) {
         setIsAuthenticated(true);
         fetchArticles();
       } else {
         const data = await res.json();
-        alert(data.error || "Parol noto'g'ri");
+        alert(data.error || "Parol yoki kaptcha noto'g'ri");
+        setCaptchaAnswer("");
+        fetchChallenge();
       }
     } catch (e) {
       alert("Xatolik yuz berdi");
+      fetchChallenge();
+    } finally {
+      setLoginLoading(false);
     }
   };
 
@@ -196,6 +236,31 @@ export default function AdminDashboard() {
       console.error("Logout failed", e);
     }
   };
+
+  const fetchSecurityLogs = async () => {
+    setLoadingLogs(true);
+    try {
+      const res = await fetch(API_ROUTES.admin.securityLogs);
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        return;
+      }
+      if (res.ok) {
+        const data = await res.json();
+        setSecurityLogs(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch security logs", e);
+    } finally {
+      setLoadingLogs(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated && activeTab === "security") {
+      fetchSecurityLogs();
+    }
+  }, [isAuthenticated, activeTab]);
 
   if (checkingAuth) {
     return (
@@ -234,17 +299,78 @@ export default function AdminDashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="w-full max-w-md mx-auto mt-20 p-8 bg-card/60 border border-border/60 rounded-2xl backdrop-blur-md">
-        <h1 className="text-2xl font-bold font-heading mb-6 text-foreground text-center">Admin Access</h1>
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <input 
-            type="password" 
-            placeholder="Password" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-input/50 border border-border/60 rounded-xl px-4 py-3 text-foreground"
-          />
-          <Button type="submit" className="w-full rounded-xl py-6 tracking-widest font-bold">L O G I N</Button>
+      <div className="w-full max-w-md mx-auto mt-20 p-8 bg-gradient-to-b from-card/80 to-card/40 border border-border/40 rounded-3xl shadow-2xl backdrop-blur-xl relative overflow-hidden group text-left">
+        <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-transparent opacity-50 pointer-events-none" />
+        
+        <div className="flex flex-col items-center mb-8 relative z-10">
+          <div className="w-16 h-16 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center mb-4 shadow-inner relative group-hover:scale-105 transition-transform duration-300">
+            <Shield className="w-8 h-8 text-primary animate-pulse" />
+          </div>
+          <h1 className="text-2xl font-bold font-heading text-foreground tracking-tight text-center">Admin Tizimi</h1>
+          <p className="text-xs text-muted-foreground mt-1 text-center">Xavfsiz va himoyalangan workspace</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="flex flex-col gap-5 relative z-10">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Admin paroli</label>
+            <input 
+              type="password" 
+              placeholder="Parolni kiriting" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loginLoading}
+              className="w-full bg-input/40 border border-border/40 rounded-xl px-4 py-3.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/60 focus:bg-input/60 transition-all text-sm font-medium"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Xavfsizlik testi (Kaptcha)</label>
+            <div className="flex gap-2">
+              <div className="flex-1 bg-input/30 border border-border/30 rounded-xl px-4 py-3 flex items-center justify-between text-foreground text-sm font-mono relative overflow-hidden">
+                {loadingChallenge ? (
+                  <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto" />
+                ) : (
+                  <>
+                    <span>Hisoblang: <strong className="text-primary text-base font-bold">{captchaQuestion}</strong> = </span>
+                    <button 
+                      type="button" 
+                      onClick={fetchChallenge}
+                      disabled={loginLoading}
+                      title="Kaptchani yangilash"
+                      className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-input/50 animate-fade-in"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+              </div>
+              <input 
+                type="text" 
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="?" 
+                value={captchaAnswer}
+                onChange={(e) => setCaptchaAnswer(e.target.value)}
+                disabled={loginLoading}
+                className="w-20 bg-input/40 border border-border/40 rounded-xl px-3 py-3.5 text-center text-foreground font-mono focus:outline-none focus:border-primary/60 focus:bg-input/60 transition-all font-bold text-base"
+              />
+            </div>
+          </div>
+
+          <Button 
+            type="submit" 
+            disabled={loginLoading || loadingChallenge} 
+            className="w-full rounded-xl py-6 tracking-widest font-bold bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 relative overflow-hidden mt-2"
+          >
+            {loginLoading ? (
+              <span className="flex items-center gap-2 justify-center">
+                <span className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                TEKSHIRILMOQDA...
+              </span>
+            ) : (
+              "K I R I S H"
+            )}
+          </Button>
         </form>
       </div>
     );
@@ -277,6 +403,12 @@ export default function AdminDashboard() {
               className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-medium text-sm transition-all ${activeTab === 'subscribers' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
             >
               <Users className="w-4 h-4" /> Subscribers
+            </button>
+            <button 
+              onClick={() => setActiveTab("security")}
+              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-medium text-sm transition-all ${activeTab === 'security' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              <Shield className="w-4 h-4" /> Xavfsizlik
             </button>
           </div>
           <Button variant="outline" onClick={handleLogout} className="rounded-xl border-border/60 hover:bg-red-500/10 hover:text-red-400">
@@ -428,6 +560,74 @@ export default function AdminDashboard() {
                         <Button variant="ghost" size="icon" onClick={() => handleDeleteSubscriber(sub.id)} className="hover:bg-red-500/10 hover:text-red-400">
                           <Trash2 className="w-4 h-4" />
                         </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "security" && (
+        <div className="space-y-6 text-left">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold font-heading">Xavfsizlik Tizimi Jurnali</h2>
+              <p className="text-sm text-muted-foreground">Admin paneliga kirish urinishlari va xavfsizlik hodisalari tarixi</p>
+            </div>
+            <Button variant="outline" onClick={fetchSecurityLogs} disabled={loadingLogs} className="rounded-xl border-border/60">
+              <RefreshCw className={`w-4 h-4 mr-2 ${loadingLogs ? 'animate-spin' : ''}`} /> Yangilash
+            </Button>
+          </div>
+          
+          <div className="bg-card/50 border border-border/60 rounded-2xl overflow-hidden backdrop-blur-sm">
+            <Table>
+              <TableHeader className="bg-card/30">
+                <TableRow className="border-border/40 hover:bg-card/50">
+                  <TableHead className="text-muted-foreground">Sana va Vaqt</TableHead>
+                  <TableHead className="text-muted-foreground">Hodisa (Event)</TableHead>
+                  <TableHead className="text-muted-foreground">IP Manzil</TableHead>
+                  <TableHead className="text-muted-foreground">Holati</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loadingLogs ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                      Xavfsizlik loglari yuklanmoqda...
+                    </TableCell>
+                  </TableRow>
+                ) : securityLogs.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                      Hech qanday urinishlar topilmadi.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  securityLogs.map((log: any) => (
+                    <TableRow key={log.id} className="border-border/20 hover:bg-card/40 transition-colors">
+                      <TableCell className="font-mono text-muted-foreground text-xs py-4">
+                        {new Date(log.timestamp).toLocaleString()}
+                      </TableCell>
+                      <TableCell className="font-semibold text-foreground text-sm">
+                        {log.event === 'SUCCESS' ? 'Muvaffaqiyatli kirish' : 
+                         log.event === 'INVALID_PASSWORD' ? 'Noto\'g\'ri parol kiritildi' : 
+                         log.event === 'INVALID_CAPTCHA' ? 'Kaptcha xatosi yuz berdi' : log.event}
+                      </TableCell>
+                      <TableCell className="font-mono text-muted-foreground text-sm">
+                        {log.ip}
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={log.event === 'SUCCESS' ? 'default' : 'destructive'}
+                          className={log.event === 'SUCCESS' ? 
+                            'bg-green-500/10 text-green-400 border-green-500/20' : 
+                            'bg-red-500/10 text-red-400 border-red-500/20'}
+                        >
+                          {log.event === 'SUCCESS' ? 'RUXSAT ETILDI' : 'BLOKLANDI'}
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))

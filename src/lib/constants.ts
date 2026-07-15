@@ -43,12 +43,14 @@ export const API_ROUTES = {
   upload: "/api/upload",
   admin: {
     login: "/api/admin/login",
+    challenge: "/api/admin/login-challenge",
     logout: "/api/admin/logout",
     articles: "/api/admin/articles",
     books: "/api/admin/books",
     garden: "/api/admin/garden",
     subscribers: "/api/admin/subscribers",
     analytics: "/api/admin/analytics",
+    securityLogs: "/api/admin/security-logs",
   },
   users: "/api/users",
 } as const;

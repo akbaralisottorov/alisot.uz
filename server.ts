@@ -165,9 +165,40 @@ const upload = multer({ storage });
 // Serve public uploads statically
 app.use("/uploads", express.static(uploadDir));
 
-// Apply authentication check to all /api/admin/* routes except login and logout
+// Audit logging for security events
+const logSecurityEvent = (event: "SUCCESS" | "INVALID_PASSWORD" | "INVALID_CAPTCHA", req: any) => {
+  try {
+    const rawIp = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown";
+    const ip = typeof rawIp === "string" ? rawIp.split(",")[0].trim() : String(rawIp);
+    const logMessage = {
+      id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+      event,
+      ip
+    };
+    const logFilePath = path.join(process.cwd(), "data/admin_security_log.json");
+    let logs = [];
+    if (fs.existsSync(logFilePath)) {
+      try {
+        const raw = fs.readFileSync(logFilePath, "utf8");
+        logs = JSON.parse(raw);
+      } catch (err) {
+        console.error("Error reading security logs:", err);
+      }
+    }
+    logs.unshift(logMessage);
+    if (logs.length > 100) {
+      logs = logs.slice(0, 100);
+    }
+    fs.writeFileSync(logFilePath, JSON.stringify(logs, null, 2), "utf8");
+  } catch (e) {
+    console.error("Failed to log security event:", e);
+  }
+};
+
+// Apply authentication check to all /api/admin/* routes except login, logout and login-challenge
 app.use("/api/admin", (req, res, next) => {
-  if (req.path === "/login" || req.path === "/logout") {
+  if (req.path === "/login" || req.path === "/logout" || req.path === "/login-challenge") {
     return next();
   }
   authMiddleware(req, res, next);
@@ -181,12 +212,49 @@ app.post("/api/upload", authMiddleware, upload.single("file"), (req: any, res) =
   res.json({ url: `/uploads/${req.file.filename}` });
 });
 
-// Admin login endpoint
-app.post("/api/admin/login", (req, res) => {
-  const { password } = req.body;
+// Admin login challenge (math captcha generator)
+app.get("/api/admin/login-challenge", (req, res) => {
+  const n1 = Math.floor(Math.random() * 15) + 1;
+  const n2 = Math.floor(Math.random() * 15) + 1;
+  const sum = n1 + n2;
+  const challengeToken = signJwt({ sum, expiresAt: Date.now() + 120000 }); // Valid for 2 mins
+  res.json({ question: `${n1} + ${n2}`, challengeToken });
+});
+
+// Admin login endpoint with captcha check and brute force prevention (artificial delay)
+app.post("/api/admin/login", async (req, res) => {
+  const { password, captchaAnswer, challengeToken } = req.body;
   const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
   
+  // 1. Verify captcha token
+  if (!challengeToken || !captchaAnswer) {
+    logSecurityEvent("INVALID_CAPTCHA", req);
+    await new Promise(r => setTimeout(r, 2000));
+    return res.status(400).json({ error: "Kaptcha kiritilishi shart" });
+  }
+
+  const payload = verifyJwt(challengeToken);
+  if (!payload || !payload.sum || !payload.expiresAt) {
+    logSecurityEvent("INVALID_CAPTCHA", req);
+    await new Promise(r => setTimeout(r, 2000));
+    return res.status(400).json({ error: "Kaptcha tokeni noto'g'ri" });
+  }
+
+  if (Date.now() > payload.expiresAt) {
+    logSecurityEvent("INVALID_CAPTCHA", req);
+    await new Promise(r => setTimeout(r, 2000));
+    return res.status(400).json({ error: "Kaptcha muddati tugagan. Iltimos, sahifani yangilang." });
+  }
+
+  if (parseInt(captchaAnswer) !== payload.sum) {
+    logSecurityEvent("INVALID_CAPTCHA", req);
+    await new Promise(r => setTimeout(r, 2000));
+    return res.status(400).json({ error: "Matematik javob noto'g'ri" });
+  }
+
+  // 2. Verify password
   if (password === adminPassword) {
+    logSecurityEvent("SUCCESS", req);
     const token = signJwt({ role: "admin" });
     res.cookie("admin_token", token, {
       httpOnly: true,
@@ -196,6 +264,8 @@ app.post("/api/admin/login", (req, res) => {
     });
     return res.json({ success: true });
   } else {
+    logSecurityEvent("INVALID_PASSWORD", req);
+    await new Promise(r => setTimeout(r, 2000));
     return res.status(401).json({ error: "Parol noto'g'ri" });
   }
 });
@@ -209,6 +279,21 @@ app.post("/api/admin/logout", (req, res) => {
   });
   res.json({ success: true });
 });
+
+// Get admin security logs (protected)
+app.get("/api/admin/security-logs", authMiddleware, asyncHandler(async (req, res) => {
+  const logFilePath = path.join(process.cwd(), "data/admin_security_log.json");
+  let logs = [];
+  if (fs.existsSync(logFilePath)) {
+    try {
+      const raw = fs.readFileSync(logFilePath, "utf8");
+      logs = JSON.parse(raw);
+    } catch (err) {
+      console.error("Error reading security logs:", err);
+    }
+  }
+  res.json(logs);
+}));
 
 app.post("/api/search", async (req, res) => {
   try {

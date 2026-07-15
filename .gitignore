@@ -10,3 +10,4 @@ prisma/dev.db
 prisma/*.db
 scratch/
 imported_project/
+poto/
