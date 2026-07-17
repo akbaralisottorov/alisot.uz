@@ -9,5 +9,5 @@ coverage/
 prisma/dev.db
 prisma/*.db
 scratch/
-imported_project/
+imported_project*/
 poto/

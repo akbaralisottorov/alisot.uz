@@ -1,7 +1,7 @@
 import { ReactNode, useState, useEffect } from "react"
-import { ThemeProvider } from "@/components/theme-provider"
-import Navigation from "@/components/navigation"
-import Footer from "@/components/footer"
+import { ThemeProvider } from "@/providers/theme-provider"
+import Navigation from "@/widgets/navigation"
+import Footer from "@/widgets/footer"
 import { motion, AnimatePresence } from "motion/react"
 import { ArrowUp } from "lucide-react"
 

@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { SEO } from "@/components/SEO";
+import { SEO } from "@/shared/components/SEO";
 import { ArrowLeft, BookOpen, User, Star, Quote, Lightbulb, Bookmark } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/shared/ui/badge";
 import Markdown from "react-markdown";
-import { useReadingProgress } from "@/lib/use-reading-progress";
+import { useReadingProgress } from "@/shared/hooks/use-reading-progress";
+import { Book } from "@/shared/types";
 
 export default function BookPage() {
   const { slug } = useParams();
-  const [book, setBook] = useState<any>(null);
+  const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
 
   useReadingProgress(book?.title || "", "book");

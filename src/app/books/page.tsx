@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { SEO } from "@/components/SEO";
+import { SEO } from "@/shared/components/SEO";
 import { BookOpen, Search, Filter, Star } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations";
-import { useTranslation } from "@/lib/i18n";
+import { Input } from "@/shared/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import { Badge } from "@/shared/ui/badge";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/shared/components/animations";
+import { useTranslation } from "@/shared/lib/i18n";
+import { Book, BookCategory } from "@/shared/types";
 
 export default function BooksPage() {
   const { t, langPrefix } = useTranslation();
-  const [books, setBooks] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [categories, setCategories] = useState<BookCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   

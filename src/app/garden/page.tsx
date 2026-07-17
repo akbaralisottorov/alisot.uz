@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { SEO } from "@/components/SEO";
+import { SEO } from "@/shared/components/SEO";
 import { Sprout, Search, Filter, Leaf, LayoutGrid, Network } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { GardenGraph } from "@/components/garden-graph";
-import { FadeIn } from "@/components/animations";
+import { Input } from "@/shared/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import { GardenGraph } from "@/features/garden/garden-graph";
+import { FadeIn } from "@/shared/components/animations";
+import { GardenNote } from "@/shared/types";
 
 export default function GardenPage() {
-  const [notes, setNotes] = useState<any[]>([]);
+  const [notes, setNotes] = useState<GardenNote[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<"grid" | "graph">("grid");

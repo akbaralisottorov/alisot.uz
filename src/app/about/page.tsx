@@ -1,8 +1,8 @@
-import { SEO } from "@/components/SEO";
-import { Timeline } from "@/components/timeline";
+import { SEO } from "@/shared/components/SEO";
+import { Timeline } from "@/shared/components/timeline";
 import { Target, Brain, TrendingUp, Compass, Award } from "lucide-react";
-import { FadeIn, StaggerContainer, StaggerItem, CountUp } from "@/components/animations";
-import { useTranslation } from "@/lib/i18n";
+import { FadeIn, StaggerContainer, StaggerItem, CountUp } from "@/shared/components/animations";
+import { useTranslation } from "@/shared/lib/i18n";
 
 export default function AboutPage() {
   const { t, currentLang, langPrefix } = useTranslation();

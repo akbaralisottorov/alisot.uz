@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { SEO } from "@/components/SEO";
+import { SEO } from "@/shared/components/SEO";
 import { ArrowLeft, Leaf, Network, Tag, Sprout } from "lucide-react";
 import Markdown from "react-markdown";
-import { useReadingProgress } from "@/lib/use-reading-progress";
+import { useReadingProgress } from "@/shared/hooks/use-reading-progress";
+import { GardenNote } from "@/shared/types";
 
 export default function GardenNotePage() {
   const { slug } = useParams();
-  const [note, setNote] = useState<any>(null);
+  const [note, setNote] = useState<GardenNote | null>(null);
   const [loading, setLoading] = useState(true);
 
   useReadingProgress(note?.title || "", "note");
@@ -113,7 +114,7 @@ export default function GardenNotePage() {
                 <h4 className="text-xs font-bold text-foreground mb-3 uppercase tracking-wider">Chiquvchi havolalar</h4>
                 {note.linkedNodes && note.linkedNodes.length > 0 ? (
                   <ul className="space-y-3">
-                    {note.linkedNodes.map((linkedNote: any) => (
+                    {note.linkedNodes.map((linkedNote: GardenNote) => (
                       <li key={linkedNote.slug} className="border-l border-border pl-3.5 hover:border-gold transition-colors">
                         <Link to={`/garden/${linkedNote.slug}`} className="text-sm text-foreground hover:text-gold flex flex-col gap-0.5 focus-ring rounded px-1">
                           <span className="font-semibold leading-tight">{linkedNote.title}</span>
@@ -134,7 +135,7 @@ export default function GardenNotePage() {
                 <h4 className="text-xs font-bold text-foreground mb-3 uppercase tracking-wider">Ortga havolalar</h4>
                 {note.backlinks && note.backlinks.length > 0 ? (
                   <ul className="space-y-3">
-                    {note.backlinks.map((backlink: any) => (
+                    {note.backlinks.map((backlink: GardenNote) => (
                       <li key={backlink.slug} className="border-l border-border pl-3.5 hover:border-gold transition-colors">
                         <Link to={`/garden/${backlink.slug}`} className="text-sm text-foreground hover:text-gold flex flex-col gap-0.5 focus-ring rounded px-1">
                           <span className="font-semibold leading-tight">{backlink.title}</span>

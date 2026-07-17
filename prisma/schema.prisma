@@ -115,3 +115,30 @@ model Subscriber {
   confirmed Boolean  @default(false)
 }
 
+model Idea {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  content     String
+  status      String   @default("DRAFT") // "DRAFT", "ACTIVE", "COMPLETED"
+  priority    String   @default("MEDIUM") // "LOW", "MEDIUM", "HIGH"
+  tags        String?
+  embedding   Unsupported("vector(1536)")?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LearningNode {
+  id         String   @id @default(uuid())
+  category   String   // "programming", "finance", "ai", "design", "business", "startups"
+  title      String
+  progress   Int      @default(0) // 0-100%
+  notes      String
+  resources  String?
+  takeaways  String?
+  links      String?
+  embedding  Unsupported("vector(1536)")?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+

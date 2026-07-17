@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from "react";
-import { SEO } from "@/components/SEO";
+import { SEO } from "@/shared/components/SEO";
 import { Search, Laptop, Code2, PenTool } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations";
+import { Input } from "@/shared/ui/input";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/shared/components/animations";
 import { AnimatePresence, motion } from "motion/react";
 
 interface UseItem {
