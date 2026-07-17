@@ -263,6 +263,122 @@ export function AnalyticsDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Audience Referrals & Keywords */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Traffic Sources */}
+        <div className="p-6 rounded-2xl bg-card/50 border border-border/60 backdrop-blur-sm">
+          <h3 className="text-lg font-bold font-heading mb-6">Traffic Sources</h3>
+          <div className="space-y-4 text-left">
+            {(analytics.trafficSources || []).map((source: any, idx: number) => (
+              <div key={idx}>
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className="text-muted-foreground">{source.source}</span>
+                  <span className="font-bold text-gold">{source.share}%</span>
+                </div>
+                <div className="w-full bg-input/40 rounded-full h-1.5 overflow-hidden">
+                  <div className="bg-gold h-1.5 rounded-full" style={{ width: `${source.share}%` }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Device Types */}
+        <div className="p-6 rounded-2xl bg-card/50 border border-border/60 backdrop-blur-sm">
+          <h3 className="text-lg font-bold font-heading mb-6">Device Share</h3>
+          <div className="space-y-4 text-left">
+            {(analytics.deviceTypes || []).map((device: any, idx: number) => (
+              <div key={idx}>
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className="text-muted-foreground">{device.type}</span>
+                  <span className="font-bold text-gold">{device.share}%</span>
+                </div>
+                <div className="w-full bg-input/40 rounded-full h-1.5 overflow-hidden">
+                  <div className="bg-gold h-1.5 rounded-full" style={{ width: `${device.share}%` }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Engagement Performance */}
+        <div className="p-6 rounded-2xl bg-card/50 border border-border/60 backdrop-blur-sm flex flex-col justify-between">
+          <div>
+            <h3 className="text-lg font-bold font-heading mb-6">Engagement Performance</h3>
+            <div className="grid grid-cols-2 gap-4 text-left">
+              <div>
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">Bounce Rate</span>
+                <span className="text-xl font-bold font-heading text-foreground">{analytics.engagementMetrics?.bounceRate}</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">Avg Duration</span>
+                <span className="text-xl font-bold font-heading text-foreground">{analytics.engagementMetrics?.avgDuration}</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">Newsletter Growth</span>
+                <span className="text-xl font-bold font-heading text-emerald-400">{analytics.engagementMetrics?.newsletterGrowth}</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">Resume Downloads</span>
+                <span className="text-xl font-bold font-heading text-gold">{analytics.engagementMetrics?.resumeDownloads}</span>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-border/20 pt-4 mt-6 text-center text-xs text-muted-foreground font-bold uppercase">
+            GitHub Clicks: {analytics.engagementMetrics?.githubClicks}
+          </div>
+        </div>
+      </div>
+
+      {/* Search Keywords & Countries */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top Keywords */}
+        <div className="p-6 rounded-2xl bg-card/50 border border-border/60 backdrop-blur-sm text-left">
+          <h3 className="text-lg font-bold font-heading mb-6">Top Search Keywords</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border/40 text-muted-foreground">
+                  <th className="pb-3 font-medium">Keyword</th>
+                  <th className="pb-3 font-medium text-right">Queries</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(analytics.searchKeywords || []).map((keyword: any, idx: number) => (
+                  <tr key={idx} className="border-b border-border/20 last:border-0 hover:bg-card/40 transition-colors">
+                    <td className="py-3 font-medium text-foreground">{keyword.word}</td>
+                    <td className="py-3 text-right text-gold font-bold font-mono">{keyword.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Countries */}
+        <div className="p-6 rounded-2xl bg-card/50 border border-border/60 backdrop-blur-sm text-left">
+          <h3 className="text-lg font-bold font-heading mb-6">Demographics (Top Countries)</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border/40 text-muted-foreground">
+                  <th className="pb-3 font-medium">Country</th>
+                  <th className="pb-3 font-medium text-right">Unique Visitors</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(analytics.countries || []).map((country: any, idx: number) => (
+                  <tr key={idx} className="border-b border-border/20 last:border-0 hover:bg-card/40 transition-colors">
+                    <td className="py-3 font-medium text-foreground">{country.name}</td>
+                    <td className="py-3 text-right text-gold font-bold font-mono">{country.visitors}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

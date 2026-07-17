@@ -18,6 +18,7 @@ import BooksShelfSection from "@/widgets/BooksShelfSection";
 import NowSection from "@/widgets/NowSection";
 import AboutSection from "@/widgets/AboutSection";
 import ContactSection from "@/widgets/ContactSection";
+import TimelinePreviewSection from "@/widgets/TimelinePreviewSection";
 
 export default function Page() {
   const { t, currentLang, langPrefix } = useTranslation();
@@ -99,6 +100,9 @@ export default function Page() {
         currentLang={currentLang} 
         error={error} 
       />
+
+      {/* Experience Timeline Preview Section */}
+      <TimelinePreviewSection currentLang={currentLang} t={t} />
 
       {/* Digital Garden Teaser Section */}
       <DigitalGardenTeaserSection langPrefix={langPrefix} t={t} currentLang={currentLang} />

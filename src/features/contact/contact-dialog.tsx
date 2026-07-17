@@ -4,6 +4,7 @@ import { X, Send, CheckCircle2, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "@/shared/lib/i18n";
 import { API_ROUTES } from "@/shared/constants";
+import { api } from "@/shared/lib/api";
 
 interface ContactDialogProps {
   isOpen: boolean;
@@ -80,28 +81,18 @@ export function ContactDialog({ isOpen, onClose }: ContactDialogProps) {
     setErrorMsg("");
 
     try {
-      const response = await fetch(API_ROUTES.contact, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject,
-          message: formData.message,
-        }),
+      await api.post(API_ROUTES.contact, {
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Xabarni yuborishda xatolik yuz berdi");
-      }
 
       setStatus("success");
       setFormData(INITIAL_FORM);
     } catch (err: any) {
       setStatus("error");
-      setErrorMsg(err.message || "Tizimda xatolik. Keyinroq qayta urinib ko'ring.");
+      setErrorMsg(err.message || t("contact.error_generic"));
     } finally {
       setLoading(false);
     }
@@ -161,16 +152,16 @@ export function ContactDialog({ isOpen, onClose }: ContactDialogProps) {
               >
                 <CheckCircle2 className="w-16 h-16 text-emerald-500 mb-4 animate-status-pulse" />
                 <h3 className="font-heading text-lg font-bold text-foreground mb-2">
-                  Xabar muvaffaqiyatli yuborildi!
+                  {t("contact.success_title")}
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground leading-relaxed max-w-xs mb-8">
-                  Tez orada siz bilan bog'lanaman. E'tiboringiz uchun rahmat!
+                  {t("contact.success_desc")}
                 </p>
                 <button
                   onClick={handleClose}
                   className="px-6 py-2.5 bg-gold hover:bg-gold-hover text-white rounded-full text-xs font-bold uppercase tracking-wider transition-all"
                 >
-                  Yopish
+                  {t("contact.close")}
                 </button>
               </motion.div>
             ) : (
@@ -196,35 +187,35 @@ export function ContactDialog({ isOpen, onClose }: ContactDialogProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     id="name"
-                    label="Ismingiz"
+                    label={t("contact.name_label")}
                     required
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="Ismingizni kiriting"
+                    placeholder={t("contact.name_placeholder")}
                   />
                   <FormField
                     id="email"
-                    label="Pochtangiz"
+                    label={t("contact.email_label")}
                     type="email"
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="email@example.com"
+                    placeholder={t("contact.email_placeholder")}
                   />
                 </div>
 
                 <FormField
                   id="subject"
-                  label="Mavzu"
+                  label={t("contact.subject_label")}
                   required
                   value={formData.subject}
                   onChange={handleChange}
-                  placeholder="Xabar mavzusi"
+                  placeholder={t("contact.subject_placeholder")}
                 />
 
                 <div className="space-y-1">
                   <label htmlFor="message" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Xabaringiz <span className="text-red-500">*</span>
+                    {t("contact.message_label")} <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     id="message"
@@ -233,7 +224,7 @@ export function ContactDialog({ isOpen, onClose }: ContactDialogProps) {
                     rows={4}
                     value={formData.message}
                     onChange={handleChange}
-                    placeholder="Xabaringiz matnini kiriting..."
+                    placeholder={t("contact.message_placeholder")}
                     className="w-full px-4 py-3 bg-black/5 dark:bg-white/5 border border-border/60 hover:border-border rounded-xl text-sm focus-ring outline-none transition-colors placeholder:text-muted-foreground/50 resize-none"
                   />
                 </div>

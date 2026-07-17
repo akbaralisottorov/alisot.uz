@@ -91,7 +91,7 @@ export default function ReadingSection({ readingNowBook, langPrefix, t, currentL
               {/* Changed Thinking */}
               {readingNowBook.changedThinking && (
                 <div className="mb-4">
-                  <span className="block text-[10px] font-extrabold text-gold uppercase tracking-widest mb-1.5">Fikrlarimni qanday o'zgartirdi?</span>
+                  <span className="block text-[10px] font-extrabold text-gold uppercase tracking-widest mb-1.5">{t("reading.changed")}</span>
                   <p className="text-xs text-muted-foreground leading-relaxed max-w-[650px] italic">{readingNowBook.changedThinking}</p>
                 </div>
               )}
@@ -99,7 +99,7 @@ export default function ReadingSection({ readingNowBook, langPrefix, t, currentL
               {/* Related Articles */}
               {readingNowBook.relatedArticles && readingNowBook.relatedArticles.length > 0 && (
                 <div>
-                  <span className="block text-[10px] font-extrabold text-gold uppercase tracking-widest mb-1.5">Bog'liq maqolalar</span>
+                  <span className="block text-[10px] font-extrabold text-gold uppercase tracking-widest mb-1.5">{t("reading.related")}</span>
                   <div className="flex gap-4">
                     {readingNowBook.relatedArticles.map((art, i) => (
                       <Link 

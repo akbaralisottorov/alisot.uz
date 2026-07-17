@@ -6,13 +6,9 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
-    optimizeDeps: {
-      exclude: ['hls.js', '@mediapipe/tasks-vision']
-    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
-        'hls.js': path.resolve(__dirname, './node_modules/hls.js/dist/hls.js'),
       },
     },
     server: {

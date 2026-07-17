@@ -23,6 +23,7 @@ const GardenPage = lazy(() => import("./app/garden/page"));
 const GardenNotePage = lazy(() => import("./app/garden/GardenNotePage"));
 const ProjectsPage = lazy(() => import("./app/projects/page"));
 const ProjectPage = lazy(() => import("./app/projects/ProjectPage"));
+const WritingPage = lazy(() => import("./app/writing/page"));
 const NowPage = lazy(() => import("./app/now/page"));
 const TimelinePage = lazy(() => import("./app/timeline/page"));
 const LearningPage = lazy(() => import("./app/learning/page"));
@@ -49,6 +50,7 @@ function AnimatedRoutes() {
           <Route path="/garden/:slug" element={<PageTransition><GardenNotePage /></PageTransition>} />
           <Route path="/projects" element={<PageTransition><ProjectsPage /></PageTransition>} />
           <Route path="/projects/:slug" element={<PageTransition><ProjectPage /></PageTransition>} />
+          <Route path="/writing" element={<PageTransition><WritingPage /></PageTransition>} />
           <Route path="/now" element={<PageTransition><NowPage /></PageTransition>} />
           <Route path="/timeline" element={<PageTransition><TimelinePage /></PageTransition>} />
           <Route path="/learning" element={<PageTransition><LearningPage /></PageTransition>} />
@@ -68,6 +70,7 @@ function AnimatedRoutes() {
           <Route path="/:lang/garden/:slug" element={<PageTransition><GardenNotePage /></PageTransition>} />
           <Route path="/:lang/projects" element={<PageTransition><ProjectsPage /></PageTransition>} />
           <Route path="/:lang/projects/:slug" element={<PageTransition><ProjectPage /></PageTransition>} />
+          <Route path="/:lang/writing" element={<PageTransition><WritingPage /></PageTransition>} />
           <Route path="/:lang/now" element={<PageTransition><NowPage /></PageTransition>} />
           <Route path="/:lang/timeline" element={<PageTransition><TimelinePage /></PageTransition>} />
           <Route path="/:lang/learning" element={<PageTransition><LearningPage /></PageTransition>} />

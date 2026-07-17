@@ -135,7 +135,7 @@ export const StaggerContainer = ({
   );
 };
 
-export const StaggerItem = ({ children, className }: { children: ReactNode; className?: string; key?: any }) => {
+export const StaggerItem = ({ children, className }: { children: ReactNode; className?: string }) => {
   return (
     <motion.div
       variants={{
@@ -149,7 +149,7 @@ export const StaggerItem = ({ children, className }: { children: ReactNode; clas
   );
 };
 
-export const HoverCard = ({ children, className = "" }: { children: ReactNode; className?: string; key?: any }) => {
+export const HoverCard = ({ children, className = "" }: { children: ReactNode; className?: string }) => {
   return (
     <motion.div
       whileHover={{ y: -4, scale: 1.01 }}

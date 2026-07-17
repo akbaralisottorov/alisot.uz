@@ -1,27 +1,6 @@
 export type Language = "uz" | "en" | "ru";
 
-export const ArticleStatus = {
-  DRAFT: "DRAFT",
-  PUBLISHED: "PUBLISHED",
-} as const;
-
-export type ArticleStatus = typeof ArticleStatus[keyof typeof ArticleStatus];
-
-export const BookStatus = {
-  WANT_TO_READ: "WANT_TO_READ",
-  READING: "READING",
-  COMPLETED: "COMPLETED",
-} as const;
-
-export type BookStatus = typeof BookStatus[keyof typeof BookStatus];
-
-export const GardenStatus = {
-  SEEDLING: "SEEDLING",
-  INCUBATOR: "INCUBATOR",
-  EVERGREEN: "EVERGREEN",
-} as const;
-
-export type GardenStatus = typeof GardenStatus[keyof typeof GardenStatus];
+import { ArticleStatus, BookStatus, GardenStatus } from "../constants";
 
 export interface User {
   id: string;

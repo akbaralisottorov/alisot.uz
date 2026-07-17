@@ -3,99 +3,14 @@ import { Timeline } from "@/shared/components/timeline";
 import { Target, Brain, TrendingUp, Compass, Award } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem, CountUp } from "@/shared/components/animations";
 import { useTranslation } from "@/shared/lib/i18n";
+import { getAboutTimelineEvents, getFocusAreas, getValueItems } from "@/shared/data/about";
 
 export default function AboutPage() {
   const { t, currentLang, langPrefix } = useTranslation();
 
-  const timelineEvents = [
-    {
-      year: "2026",
-      title: currentLang === "en" ? "Created Tax Helper AI" : currentLang === "ru" ? "Создал ассистента Tax Helper AI" : "Tax Helper AI loyihasini yaratdim",
-      role: currentLang === "en" ? "AI & Tax Integration" : currentLang === "ru" ? "Интеграция ИИ и налогов" : "AI & Soliq Integratsiyasi",
-      description: currentLang === "en" ? "Built the first AI assistant that allows freelancers and small businesses to calculate and optimize tax reports error-free in 5 minutes." : currentLang === "ru" ? "Создал первого ИИ-ассистента для фрилансеров и малого бизнеса, позволяющего безошибочно рассчитывать и оптимизировать налоговые отчеты за 5 минут." : "Frilanserlar va kichik bizneslarning soliq hisobotlarini 5 daqiqa ichida xatosiz hisoblash va optimallashtirish imkonini beruvchi birinchi AI assistentni qurdim.",
-      icon: "milestone" as const,
-    },
-    {
-      year: "2025",
-      title: currentLang === "en" ? "Launched Teran Fikr Platform" : currentLang === "ru" ? "Запустил платформу Teran Fikr" : "Teran Fikr platformasini ishga tushirdim",
-      role: currentLang === "en" ? "Premium Essays & Opinions" : currentLang === "ru" ? "Премиум эссе и мнения" : "Premium Maqolalar & Fikrlar",
-      description: currentLang === "en" ? "Created an ad-free premium intellectual essay platform in Uzbek, encouraging readers to think deeply and read analysis in a calm environment." : currentLang === "ru" ? "Создал премиальную интеллектуальную платформу эссе на узбекском языке без рекламы, побуждающую читателей глубоко мыслить и читать аналитику в спокойной обстановке." : "O'zbek tilida reklamasiz, o'quvchini chuqur fikrlash va tahlillarni sokin muhitda o'qishga undaydigan premium intellektual esselar platformasini yaratdim.",
-      icon: "milestone" as const,
-    },
-    {
-      year: "2024",
-      title: currentLang === "en" ? "Began Studying Behavioral Economics" : currentLang === "ru" ? "Начал изучать поведенческую экономику" : "Xulq-atvor iqtisodiyotini o'rganishga kirishdim",
-      role: currentLang === "en" ? "Cognitive Psychology & Finance" : currentLang === "ru" ? "Когнитивная психология и финансы" : "Kognitiv Psixologiya & Moliya",
-      description: currentLang === "en" ? "Started deep analysis of human decision-making biases and research into irrational factors shaping financial and consumer habits." : currentLang === "ru" ? "Начал глубокий анализ ошибок принятия решений людьми, исследование иррациональных факторов, формирующих финансовые и потребительские привычки." : "Insonlarning qaror qabul qilishdagi og'ishlarini chuqur tahlil qilish, ularning moliya va iste'molchilik odatlarini shakllantiruvchi irratsional omillarni tadqiq qilishni boshladim.",
-      icon: "milestone" as const,
-    },
-    {
-      year: "2023",
-      title: currentLang === "en" ? "Started Writing Actively Online" : currentLang === "ru" ? "Начал активно писать в интернете" : "Internetda faol ravishda yozishni boshladim",
-      role: currentLang === "en" ? "Thoughts & Analysis" : currentLang === "ru" ? "Мысли и анализ" : "Fikrlar & Tahlillar",
-      description: currentLang === "en" ? "Began sharing my library, book summaries, and independent articles on branding and marketing with the public." : currentLang === "ru" ? "Начал делиться с публикой своей библиотекой, конспектами прочитанных книг, независимыми статьями по брендингу и маркетингу." : "Kutubxonam, o'qigan kitoblarim xulosalari, brending va marketing masalalari bo'yicha mustaqil maqolalarimni omma bilan baham ko'rishni boshladim.",
-      icon: "milestone" as const,
-    },
-    {
-      year: "2022",
-      title: currentLang === "en" ? "Built First Digital Project & Personal Site" : currentLang === "ru" ? "Создал первый цифровой проект и личный сайт" : "Ilk raqamli loyiham va shaxsiy saytimni qurdim",
-      role: currentLang === "en" ? "Frontend & Design" : currentLang === "ru" ? "Фронтенд и проектирование" : "Frontend & Loyihalash",
-      description: currentLang === "en" ? "Learned UI/UX design systems, HTML/CSS and Javascript basics, and created my first digital home on the internet." : currentLang === "ru" ? "Изучил основы UI/UX систем дизайна, HTML/CSS и Javascript, создав свою первую цифровую обитель в интернете." : "UI/UX dizayn tizimlarini, HTML/CSS va Javascript asoslarini o'rganib, internet olamida o'zimning birinchi raqamli boshpanamni yaratdim.",
-      icon: "milestone" as const,
-    },
-    {
-      year: "2020",
-      title: currentLang === "en" ? "Steps into Programming & Systems" : currentLang === "ru" ? "Сделал шаги в программирование и системы" : "Dasturlash va tizimlarni o'rganishga qadam qo'ydim",
-      role: currentLang === "en" ? "Technology & Logic" : currentLang === "ru" ? "Технологии и логика" : "Texnologiya & Mantiq",
-      description: currentLang === "en" ? "Self-studied algorithms, data structures, and clean coding culture, laying the foundation for my technological and engineering worldview." : currentLang === "ru" ? "Самостоятельно изучил алгоритмы, структуры данных и культуру написания кода, заложив основу своего технологического и инженерного мировоззрения." : "Algoritmlar, ma'lumotlar tuzilmasi va kod yozish madaniyatini mustaqil o'rganib, muhandislik va texnologik dunyoqarashimga asos soldim.",
-      icon: "milestone" as const,
-    },
-  ];
-
-  const focusAreas = [
-    {
-      title: currentLang === "en" ? "Brand Strategy" : currentLang === "ru" ? "Бренд-стратегия" : "Brend Strategiyasi",
-      description: currentLang === "en" ? "Defining brand identity, shaping core values, and establishing a strong connection with the audience." : currentLang === "ru" ? "Определение уникальности брендов, формирование ценностей и установление прочной связи с аудиторией." : "Brendlarning o'ziga xosligini aniqlash, qadriyatlarini shakllantirish va auditoriya bilan mustahkam aloqa o'rnatish.",
-      icon: <Target className="w-5 h-5 text-gold" />,
-    },
-    {
-      title: currentLang === "en" ? "Behavioral Economics" : currentLang === "ru" ? "Поведенческая экономика" : "Xatti-harakatlar Iqtisodiyoti",
-      description: currentLang === "en" ? "Applying decision-making mechanisms, cognitive biases, and irrational choices to marketing." : currentLang === "ru" ? "Применение механизмов принятия решений, когнитивных ошибок и иррационального выбора в маркетинге." : "Odamlarning qaror qabul qilish mexanizmlari, kognitiv xatoliklar va irratsional tanlovlarini marketingga tatbiq etish.",
-      icon: <Brain className="w-5 h-5 text-gold" />,
-    },
-    {
-      title: currentLang === "en" ? "Brand Communications" : currentLang === "ru" ? "Коммуникации бренда" : "Brand Communications",
-      description: currentLang === "en" ? "Laws of ideas spreading in society, creative PR, and integrated communication campaigns." : currentLang === "ru" ? "Законы распространения идей в обществе, креативный PR и интегрированные коммуникационные кампании." : "G'oyalarning jamiyatda tarqalish qonuniyatlari, kreativ PR va integratsiyalashgan kommunikatsiya kampaniyalari.",
-      icon: <TrendingUp className="w-5 h-5 text-gold" />,
-    },
-  ];
-
-  const values = [
-    {
-      title: currentLang === "en" ? "Think Deeply" : currentLang === "ru" ? "Думайте глубже" : "Chuqur o'yla. (Think deeply)",
-      description: currentLang === "en" ? "Superficial solutions are temporary. True results are achieved by understanding the root of the problem, human nature, and psychology." : currentLang === "ru" ? "Поверхностные решения временны. Настоящий результат достигается за счет понимания сути проблемы, человеческой природы и психологии." : "Yuzaki yechimlar vaqtinchalik. Haqiqiy natija muammoning ildizini, inson tabiati va psixologiyasini anglash orqali erishiladi."
-    },
-    {
-      title: currentLang === "en" ? "Build Consistently" : currentLang === "ru" ? "Стройте регулярно" : "Muntazam ravishda qur. (Build consistently)",
-      description: currentLang === "en" ? "Keeping ideas only in your head is useless. Writing practical code and creating products every day reinforces design logic." : currentLang === "ru" ? "Бесполезно держать идеи только в голове. Ежедневное написание практического кода и создание продуктов укрепляют логику дизайна." : "G'oyalarni faqat boshda saqlash foydasiz. Har kuni amaliy kod yozish, mahsulot yaratish dizayn mantiqini mustahkamlaydi."
-    },
-    {
-      title: currentLang === "en" ? "Share Openly" : currentLang === "ru" ? "Делитесь открыто" : "Ochiqchasiga ulash. (Share openly)",
-      description: currentLang === "en" ? "Knowledge and experience should not be hidden. Every analysis shared with the community is a cornerstone of personal growth and trust." : currentLang === "ru" ? "Знания и опыт не следует скрывать. Каждый анализ, которым вы делитесь с сообществом, является краеугольным камнем личного роста и доверия." : "Bilim va tajribani yashirmaslik lozim. Jamiyatga ulashilgan har bir tahlil shaxsiy o'sish va ishonch poydevoridir."
-    },
-    {
-      title: currentLang === "en" ? "Stay Curious" : currentLang === "ru" ? "Оставайтесь любознательными" : "Hamisha izlanuvchan bo'l. (Stay curious)",
-      description: currentLang === "en" ? "Never stop learning. The synthesis of finance, psychology, and technology yields the best results." : currentLang === "ru" ? "Никогда не прекращайте учиться. Синтез финансов, психологии и технологий дает наилучшие результаты." : "Hech qachon o'rganishdan to'xtamaslik kerak. Moliya, psixologiya va texnologiya sohalari sintezi eng yaxshi natijani beradi."
-    },
-    {
-      title: currentLang === "en" ? "Learn in Public" : currentLang === "ru" ? "Учитесь публично" : "Ko'pchilik oldida o'rgan. (Learn in public)",
-      description: currentLang === "en" ? "Do not be ashamed of making mistakes, but writing down the learning process and shortcomings openly helps others too." : currentLang === "ru" ? "Не стесняйтесь делать ошибки, открытое описание процесса обучения и недостатков помогает и другим." : "Xatolar qilishdan uyalmaslik, balki o'rganish jarayonini va kamchiliklarni ochiq yozib borish boshqalarga ham yordam beradi."
-    },
-    {
-      title: currentLang === "en" ? "Prefer Clarity" : currentLang === "ru" ? "Предпочитайте ясность" : "Murakkablikdan ko'ra aniqlikni afzal ko'r. (Clarity)",
-      description: currentLang === "en" ? "Elegant, minimalist approach maintains attention. Simplicity in words and design is the highest skill." : currentLang === "ru" ? "Элегантный, минималистичный подход удерживает внимание. Простота в словах и дизайне — высшее мастерство." : "Elegant, minimalist yondashuv diqqatni saqlab qoladi. So'zlar va dizayndagi soddalik — eng yuksak mahoratdir."
-    }
-  ];
+  const timelineEvents = getAboutTimelineEvents(currentLang);
+  const focusAreas = getFocusAreas(currentLang);
+  const values = getValueItems(currentLang);
 
   return (
     <div className="w-full max-w-[1000px] mx-auto py-12 px-6 md:px-12 flex flex-col gap-[140px] text-left selection:bg-gold/25 selection:text-foreground">
@@ -246,6 +161,37 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Mission & Learning Philosophy Section */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-[32px] border-t border-border pt-16">
+        <div className="space-y-4">
+          <h2 className="font-heading text-2xl md:text-[28px] font-bold text-foreground flex items-center gap-2">
+            <Target className="w-6 h-6 text-gold" />
+            <span>{currentLang === "en" ? "My Mission" : currentLang === "ru" ? "Моя миссия" : "Missiyam"}</span>
+          </h2>
+          <p className="font-sans text-muted-foreground leading-relaxed text-base">
+            {currentLang === "en" 
+              ? "My mission is to synthesize cognitive psychology, finance, and technology to design choice architectures and brand structures that support human intuition and build sustainable trust between platforms and creators."
+              : currentLang === "ru"
+              ? "Моя миссия — синтезировать когнитивную психологию, финансы и технологии для проектирования архитектур выбора и брендовых систем, которые поддерживают человеческую интуицию и укрепляют доверие."
+              : "Missiyam — kognitiv psixologiya, moliya va texnologiyalarni sintez qilib, inson intuitsiyasini qo'llab-quvvatlovchi tanlov arxitekturalarini hamda brend tizimlarini yaratish, foydalanuvchilar ishonchini mustahkamlash."}
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <h2 className="font-heading text-2xl md:text-[28px] font-bold text-foreground flex items-center gap-2">
+            <Brain className="w-6 h-6 text-gold" />
+            <span>{currentLang === "en" ? "Learning Philosophy" : currentLang === "ru" ? "Философия обучения" : "O'rganish falsafam"}</span>
+          </h2>
+          <p className="font-sans text-muted-foreground leading-relaxed text-base">
+            {currentLang === "en" 
+              ? "I believe in 'learning in public'. Every research paper read, database designed, or startup launched is not just a discrete project, but an opportunity to compile, synthesize, and refine behavioral insights for the community."
+              : currentLang === "ru"
+              ? "Я верю в 'обучение на виду у всех'. Каждая прочитанная статья, база данных или запущенный стартап — это не просто отдельный проект, а возможность структурировать и распространять полезные инсайты."
+              : "Men jamoat oldida o'rganish ('learning in public') falsafasiga ishonaman. Har bir o'qilgan tadqiqot ishi, ma'lumotlar bazasi loyihasi yoki ishga tushirilgan startap bu amaliy xulosalarni jamiyat bilan ulashish imkonidir."}
+          </p>
+        </div>
+      </section>
+
       {/* Core Values Section */}
       <section className="space-y-10 border-t border-border pt-16">
         <div>
@@ -287,6 +233,51 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Goals & Interests Section */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-[32px] border-t border-border pt-16">
+        <div className="bg-white dark:bg-card border border-border rounded-[24px] p-8 space-y-4">
+          <h2 className="font-heading text-xl font-bold text-foreground flex items-center gap-2">
+            <Target className="w-5 h-5 text-gold" />
+            <span>{currentLang === "en" ? "Current Goals" : currentLang === "ru" ? "Текущие цели" : "Hozirgi maqsadlar"}</span>
+          </h2>
+          <ul className="space-y-3 font-sans text-sm text-muted-foreground">
+            {currentLang === "en" ? (
+              <>
+                <li className="flex items-start gap-2">✓ Launch the freelance Tax Helper AI helper platform beta.</li>
+                <li className="flex items-start gap-2">✓ Conclude and publish a brand positioning case study in Tashkent.</li>
+                <li className="flex items-start gap-2">✓ Document and structure 100+ public garden learning notes.</li>
+              </>
+            ) : currentLang === "ru" ? (
+              <>
+                <li className="flex items-start gap-2">✓ Запустить бета-версию ИИ-ассистента Tax Helper AI для фрилансеров.</li>
+                <li className="flex items-start gap-2">✓ Завершить и опубликовать исследование бренд-позиционирования в Ташкенте.</li>
+                <li className="flex items-start gap-2">✓ Опубликовать и систематизировать более 100 заметок в Саду мыслей.</li>
+              </>
+            ) : (
+              <>
+                <li className="flex items-start gap-2">✓ Frilanserlar uchun 'Tax Helper AI' loyihasining beta-versiyasini ishga tushirish.</li>
+                <li className="flex items-start gap-2">✓ Toshkent biznes tarmoqlarida brend joylashuvi bo'yicha ilmiy tahlil chop etish.</li>
+                <li className="flex items-start gap-2">✓ Raqamli bog'da foydali ma'lumotlar bazasini 100 tadan oshirish.</li>
+              </>
+            )}
+          </ul>
+        </div>
+
+        <div className="bg-white dark:bg-card border border-border rounded-[24px] p-8 space-y-4">
+          <h2 className="font-heading text-xl font-bold text-foreground flex items-center gap-2">
+            <Compass className="w-5 h-5 text-gold" />
+            <span>{currentLang === "en" ? "Personal Interests" : currentLang === "ru" ? "Личные интересы" : "Shaxsiy qiziqishlar"}</span>
+          </h2>
+          <p className="font-sans text-sm text-muted-foreground leading-relaxed">
+            {currentLang === "en" 
+              ? "Reading books (focused on choice psychology and behavioral finance), digital gardening, practicing d3.js interactive chart design, studying cognitive heuristics, and running occasional brand consulting workshops."
+              : currentLang === "ru" 
+              ? "Чтение книг (по психологии принятия решений и поведенческим финансам), ведение цифрового сада, визуализация данных на d3.js, изучение когнитивных эвристик и проведение воркшопов."
+              : "Psixologiya hamda xulq-atvor moliyasiga oid adabiyotlar mutolaasi, raqamli bog'dorchilik, d3.js yordamida interaktiv ma'lumotlar tahlili, kognitiv evristikalar va yosh tadbirkorlar uchun brending darslari."}
+          </p>
+        </div>
+      </section>
+
       {/* Areas of Expertise */}
       <section className="space-y-10 border-t border-border pt-16">
         <div>
@@ -300,7 +291,13 @@ export default function AboutPage() {
             <StaggerItem key={i}>
               <div className="bg-white dark:bg-card border border-border p-8 rounded-[24px] hover:border-gold hover:-translate-y-1.5 hover:shadow-md transition-all duration-300 h-full">
                 <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold mb-6">
-                  {area.icon}
+                  {area.iconName === "target" ? (
+                    <Target className="w-5 h-5 text-gold" />
+                  ) : area.iconName === "brain" ? (
+                    <Brain className="w-5 h-5 text-gold" />
+                  ) : (
+                    <TrendingUp className="w-5 h-5 text-gold" />
+                  )}
                 </div>
                 <h3 className="font-sans font-bold text-lg text-foreground mb-3">{area.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{area.description}</p>
@@ -308,6 +305,59 @@ export default function AboutPage() {
             </StaggerItem>
           ))}
         </StaggerContainer>
+      </section>
+
+      {/* Skills Matrix Section */}
+      <section className="space-y-10 border-t border-border pt-16">
+        <div>
+          <span className="font-sans text-xs font-bold uppercase tracking-widest text-gold mb-3 block">SKILLS MATRIX</span>
+          <h2 className="font-heading text-3xl font-bold text-foreground">
+            {currentLang === "en" ? "Areas of Expertise" : currentLang === "ru" ? "Технологический стек и навыки" : "Texnik ko'nikmalar & Malaka"}
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-[32px]">
+          {/* Column 1: Brand Strategy */}
+          <div className="bg-white dark:bg-card border border-border p-8 rounded-[24px] flex flex-col gap-4">
+            <h3 className="font-sans font-bold text-lg text-foreground border-b border-border/60 pb-2">
+              {currentLang === "en" ? "Brand & Strategy" : currentLang === "ru" ? "Бренд и Стратегия" : "Brend & Strategiya"}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {["Brand Positioning", "Choice Architecture", "Market Analysis", "Strategic Consulting", "Communications", "Copywriting"].map(tag => (
+                <span key={tag} className="px-3 py-1.5 bg-background border border-border/80 text-xs font-medium text-muted-foreground rounded-lg">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Column 2: Engineering */}
+          <div className="bg-white dark:bg-card border border-border p-8 rounded-[24px] flex flex-col gap-4">
+            <h3 className="font-sans font-bold text-lg text-foreground border-b border-border/60 pb-2">
+              {currentLang === "en" ? "Engineering & AI" : currentLang === "ru" ? "Разработка и ИИ" : "Dasturlash & Sun'iy Intellekt"}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {["React", "TypeScript", "Node.js", "Express", "Vite", "Tailwind CSS", "Prisma ORM", "LLM Integration", "RAG Workflows"].map(tag => (
+                <span key={tag} className="px-3 py-1.5 bg-background border border-border/80 text-xs font-medium text-muted-foreground rounded-lg">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Column 3: Behavioral Science */}
+          <div className="bg-white dark:bg-card border border-border p-8 rounded-[24px] flex flex-col gap-4">
+            <h3 className="font-sans font-bold text-lg text-foreground border-b border-border/60 pb-2">
+              {currentLang === "en" ? "Behavioral & Research" : currentLang === "ru" ? "Поведение и Аналитика" : "Xulq-atvor & Tadqiqot"}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {["Behavioral Economics", "Cognitive Heuristics", "Decision Psychology", "Socio-political Studies", "Data Visualizations", "Statistical Analysis"].map(tag => (
+                <span key={tag} className="px-3 py-1.5 bg-background border border-border/80 text-xs font-medium text-muted-foreground rounded-lg">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Career Timeline */}

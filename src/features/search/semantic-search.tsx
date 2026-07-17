@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Search, Loader2 } from "lucide-react"
+import { Search, Loader2, Clock } from "lucide-react"
 import {
   CommandDialog,
   CommandEmpty,
@@ -16,7 +16,7 @@ interface SearchResult {
   title: string
   slug: string
   excerpt: string | null
-  type: 'article' | 'book' | 'garden' | 'project'
+  type: 'article' | 'book' | 'garden' | 'project' | 'idea' | 'learning'
   similarity: number
 }
 
@@ -25,6 +25,7 @@ export function SemanticSearch() {
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
+  const [history, setHistory] = useState<string[]>([])
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -34,10 +35,34 @@ export function SemanticSearch() {
         setOpen((open) => !open)
       }
     }
-
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
   }, [])
+
+  // Load search history from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("searchHistory")
+      if (stored) {
+        setHistory(JSON.parse(stored))
+      }
+    } catch (e) {
+      console.error("Failed to load search history:", e)
+    }
+  }, [open])
+
+  const saveToHistory = (q: string) => {
+    if (!q || q.trim().length < 3) return
+    const cleaned = q.trim()
+    const filtered = history.filter(h => h.toLowerCase() !== cleaned.toLowerCase())
+    const updated = [cleaned, ...filtered].slice(0, 5)
+    setHistory(updated)
+    try {
+      localStorage.setItem("searchHistory", JSON.stringify(updated))
+    } catch (e) {
+      console.error("Failed to save search history:", e)
+    }
+  }
 
   useEffect(() => {
     if (!query || query.length < 3) {
@@ -56,6 +81,7 @@ export function SemanticSearch() {
         if (res.ok) {
           const data = await res.json()
           setResults(data)
+          saveToHistory(query)
         }
       } catch (e) {
         console.error("Search failed:", e)
@@ -75,8 +101,22 @@ export function SemanticSearch() {
       navigate(`/garden/${item.slug}`)
     } else if (item.type === 'book') {
       navigate(`/books/${item.slug}`)
-    } else {
-      navigate(`/#projects`) // fallback
+    } else if (item.type === 'project') {
+      navigate(`/projects/${item.slug}`)
+    } else if (item.type === 'idea') {
+      navigate(`/ideas`)
+    } else if (item.type === 'learning') {
+      navigate(`/learning`)
+    }
+  }
+
+  const clearHistory = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setHistory([])
+    try {
+      localStorage.removeItem("searchHistory")
+    } catch (e) {
+      console.error(e)
     }
   }
 
@@ -111,6 +151,33 @@ export function SemanticSearch() {
             )}
           </CommandEmpty>
           
+          {query === "" && history.length > 0 && (
+            <CommandGroup 
+              heading={
+                <div className="flex justify-between items-center w-full">
+                  <span>Recent Queries</span>
+                  <button 
+                    onClick={clearHistory} 
+                    className="text-[9px] font-bold text-muted hover:text-destructive uppercase tracking-widest cursor-pointer"
+                  >
+                    Clear All
+                  </button>
+                </div>
+              }
+            >
+              {history.map((h) => (
+                <CommandItem
+                  key={h}
+                  onSelect={() => setQuery(h)}
+                  className="flex items-center gap-2 p-2.5 cursor-pointer text-xs"
+                >
+                  <Clock className="w-3.5 h-3.5 text-muted shrink-0" />
+                  <span>{h}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+
           {!loading && results.length > 0 && (
             <CommandGroup heading="AI Relevance Ranked Results">
               {results.map((item) => (

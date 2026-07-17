@@ -86,6 +86,13 @@ export default function ArticlePage() {
       
       // We will identify the pre index for our click delegation
       pre.setAttribute("data-code-index", index.toString());
+
+      // Create and append the copy button
+      const button = doc.createElement("button");
+      button.className = "copy-code-btn absolute top-3 right-3 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground bg-background/50 hover:bg-background border border-border/40 hover:border-border/80 rounded-md transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer";
+      button.setAttribute("data-code-index", index.toString());
+      button.textContent = "Copy";
+      pre.appendChild(button);
     });
 
     setToc(tocItems);
@@ -167,6 +174,37 @@ export default function ArticlePage() {
 
   return (
     <div className="w-full max-w-[1100px] mx-auto py-12 px-6 md:px-12 text-left selection:bg-gold/25 selection:text-foreground">
+      <style>{`
+        .content-area table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 1.5rem 0;
+          font-size: 0.9rem;
+        }
+        .content-area th, .content-area td {
+          border: 1px solid var(--border);
+          padding: 0.75rem 1rem;
+          text-align: left;
+        }
+        .content-area th {
+          background-color: var(--muted/20);
+          font-weight: bold;
+        }
+        .content-area .footnotes {
+          border-top: 1px solid var(--border);
+          margin-top: 3rem;
+          padding-top: 1.5rem;
+          font-size: 0.85rem;
+          color: var(--muted-foreground);
+        }
+        .content-area .footnote-ref {
+          font-size: 0.75rem;
+          vertical-align: super;
+          margin-left: 0.1rem;
+          color: var(--gold);
+        }
+      `}</style>
+      
       {/* Top reading progress indicator */}
       <div 
         className="fixed top-0 left-0 h-1 bg-gold z-50 transition-all duration-100 ease-out" 

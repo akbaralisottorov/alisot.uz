@@ -36,11 +36,21 @@ export function SEO({
       "headline": title,
       "image": [image],
       "datePublished": publishedAt,
+      "dateModified": publishedAt,
+      "mainEntityOfPage": finalCanonicalUrl,
       "author": [{
         "@type": "Person",
         "name": authorName,
         "url": "https://alisot.uz"
-      }]
+      }],
+      "publisher": {
+        "@type": "Organization",
+        "name": "Alisot",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://alisot.uz/og-image.png"
+        }
+      }
     });
   } else if (type === 'project') {
     schemas.push({
@@ -74,7 +84,15 @@ export function SEO({
     "@type": "Person",
     "name": "Akbarali Sottorov",
     "jobTitle": "Marketing Strategist & Tech Developer",
+    "description": "Brand strategy consultant and student researcher in Tashkent specializing in choice architecture, behavioral economics, and interactive technologies.",
     "url": "https://alisot.uz",
+    "knowsAbout": [
+      "Brand Strategy",
+      "Behavioral Economics",
+      "Choice Architecture",
+      "Frontend Development",
+      "AI Workflows"
+    ],
     "sameAs": [
       "https://t.me/akbaralisottorov",
       "https://instagram.com/akbaralisottorov",

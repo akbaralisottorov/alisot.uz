@@ -5,6 +5,7 @@ import { Input } from "@/shared/ui/input";
 import { motion, AnimatePresence } from "motion/react";
 import { API_ROUTES } from "@/shared/constants";
 import { useTranslation } from "@/shared/lib/i18n";
+import { api } from "@/shared/lib/api";
 
 export default function SubscribeForm() {
   const { t } = useTranslation();
@@ -37,24 +38,12 @@ export default function SubscribeForm() {
     setMessage("");
 
     try {
-      const res = await fetch(API_ROUTES.subscribe, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setStatus("success");
-        setEmail("");
-      } else {
-        setStatus("error");
-        setMessage(data.error || t("newsletter.error_generic"));
-      }
-    } catch {
+      await api.post(API_ROUTES.subscribe, { email });
+      setStatus("success");
+      setEmail("");
+    } catch (error: any) {
       setStatus("error");
-      setMessage(t("newsletter.error_network"));
+      setMessage(error.message || t("newsletter.error_generic"));
     } finally {
       setLoading(false);
     }

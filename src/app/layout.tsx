@@ -4,6 +4,7 @@ import Navigation from "@/widgets/navigation"
 import Footer from "@/widgets/footer"
 import { motion, AnimatePresence } from "motion/react"
 import { ArrowUp } from "lucide-react"
+import { AIAssistant } from "@/features/assistant/ai-assistant"
 
 export default function Layout({ children }: { children: ReactNode }) {
   const [showScrollTop, setShowScrollTop] = useState(false)
@@ -32,6 +33,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           {children}
         </main>
         <Footer />
+        <AIAssistant />
 
         {/* Scroll to Top Button */}
         <AnimatePresence>

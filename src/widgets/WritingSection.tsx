@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/shared/components/animations";
 import { Article, Language } from "@/shared/types";
+import { useTranslation } from "@/shared/lib/i18n";
 
 interface WritingSectionProps {
   articles: Article[];
@@ -11,27 +12,29 @@ interface WritingSectionProps {
 }
 
 export default function WritingSection({ articles, langPrefix, currentLang, error }: WritingSectionProps) {
+  const { t } = useTranslation();
+
   return (
     <section id="writing" className="w-full">
       <FadeIn className="mb-[32px]">
         <span className="font-sans text-[11px] font-extrabold uppercase tracking-widest text-gold mb-3 block">
-          {currentLang === "en" ? "ESSAYS & ANALYSIS" : currentLang === "ru" ? "ЭССЕ И АНАЛИТИКА" : "ESSELAR VA TAHLILLAR"}
+          {t("writing.badge")}
         </span>
         <h2 className="font-heading text-3xl md:text-[42px] leading-tight text-foreground font-bold">
-          {currentLang === "en" ? "Author Essays" : currentLang === "ru" ? "Авторские статьи" : "Mualliflik maqolalari"}
+          {t("writing.title")}
         </h2>
         <p className="font-sans text-lg text-muted-foreground max-w-[650px] leading-relaxed mt-2">
-          {currentLang === "en" ? "Analysis on marketing, finance, behavioral economics and psychology." : currentLang === "ru" ? "Анализ вопросов маркетинга, финансов, поведенческой экономики и психологии." : "Marketing, moliya, xulq-atvor iqtisodiyoti va psixologiya masalalari bo'yicha tahlillar."}
+          {t("writing.desc")}
         </p>
       </FadeIn>
 
       {error ? (
         <div className="bg-destructive/10 border border-destructive/20 rounded-[20px] p-6 text-destructive-foreground text-sm text-left">
-          {currentLang === "en" ? "Database connection error:" : currentLang === "ru" ? "Ошибка подключения к базе данных:" : "Ma'lumotlar bazasiga ulanishda xatolik:"} {error}
+          {t("writing.db_error")} {error}
         </div>
       ) : articles.length === 0 ? (
         <div className="bg-white dark:bg-card border border-border rounded-[24px] p-12 text-center text-muted-foreground">
-          {currentLang === "en" ? "No articles published yet." : currentLang === "ru" ? "Статьи еще не опубликованы." : "Hozircha maqolalar chop etilmagan."}
+          {t("writing.empty")}
         </div>
       ) : (
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-[32px]">
@@ -60,7 +63,7 @@ export default function WritingSection({ articles, langPrefix, currentLang, erro
                   <div className="flex items-center justify-between text-xs text-muted font-medium border-t border-border/50 pt-4 mt-auto">
                     <span>{new Date(article.createdAt).toLocaleDateString(currentLang === "uz" ? "uz-UZ" : currentLang === "ru" ? "ru-RU" : "en-US")}</span>
                     <span className="group-hover:text-gold transition-colors flex items-center gap-1 font-bold uppercase tracking-wider text-[10px]">
-                      {currentLang === "en" ? "Read" : currentLang === "ru" ? "Читать" : "O'qish"}
+                      {t("writing.cta")}
                       <ArrowUpRight className="w-3.5 h-3.5 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </span>
                   </div>

@@ -77,7 +77,7 @@ export default function Navigation() {
     { label: t("nav.home"), href: `${langPrefix}/` },
     { label: t("nav.about"), href: `${langPrefix}/about` },
     { label: t("nav.projects"), href: `${langPrefix}/projects` },
-    { label: t("nav.writing"), href: `${langPrefix}/#writing` },
+    { label: t("nav.writing"), href: `${langPrefix}/writing` },
     { label: t("nav.library"), href: `${langPrefix}/books` },
     { label: t("nav.now"), href: `${langPrefix}/now` },
     { label: t("nav.uses"), href: `${langPrefix}/uses` },
@@ -135,23 +135,24 @@ export default function Navigation() {
         <nav className="hidden lg:flex items-center gap-6 text-sm font-semibold">
           {navLinks.map((link) => {
             const active = isActive(link.href);
-            const isExternalHash = link.href.startsWith("/#");
-            const linkProps = isExternalHash 
-              ? { href: link.href } 
-              : { to: link.href };
-            const Tag = isExternalHash ? "a" : Link;
+            const isExternalHash = link.href.startsWith("/#") || link.href.includes("#");
+            const className = `relative py-1 transition-colors duration-300 focus-ring rounded-md px-2 ${
+              active 
+                ? "text-gold font-bold" 
+                : "text-muted-foreground hover:text-foreground"
+            }`;
 
             return (
-              <Tag
-                key={link.label}
-                {...(linkProps as any)}
-                className={`relative py-1 transition-colors duration-300 focus-ring rounded-md px-2 ${
-                  active 
-                    ? "text-gold font-bold" 
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {link.label}
+              <span key={link.label} className="relative">
+                {isExternalHash ? (
+                  <a href={link.href} className={className}>
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link to={link.href} className={className}>
+                    {link.label}
+                  </Link>
+                )}
                 {active && (
                   <motion.span 
                     layoutId="activeNavIndicator"
@@ -159,7 +160,7 @@ export default function Navigation() {
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
-              </Tag>
+              </span>
             );
           })}
         </nav>
@@ -264,24 +265,24 @@ export default function Navigation() {
             <nav className="flex flex-col px-6 py-6 gap-3">
               {navLinks.map((link) => {
                 const active = isActive(link.href);
-                const isExternalHash = link.href.includes("#");
-                const linkProps = isExternalHash 
-                  ? { href: link.href } 
-                  : { to: link.href };
-                const Tag = isExternalHash ? "a" : Link;
+                const isExternalHash = link.href.startsWith("/#") || link.href.includes("#");
+                const className = `block text-base font-semibold py-2.5 border-b border-border/5 px-2 rounded-lg transition-colors ${
+                  active 
+                    ? "text-gold bg-gold/5 pl-3 font-bold" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
+                }`;
 
                 return (
                   <div key={link.label} onClick={() => setIsOpen(false)}>
-                    <Tag
-                      {...(linkProps as any)}
-                      className={`block text-base font-semibold py-2.5 border-b border-border/5 px-2 rounded-lg transition-colors ${
-                        active 
-                          ? "text-gold bg-gold/5 pl-3 font-bold" 
-                          : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
-                      }`}
-                    >
-                      {link.label}
-                    </Tag>
+                    {isExternalHash ? (
+                      <a href={link.href} className={className}>
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link to={link.href} className={className}>
+                        {link.label}
+                      </Link>
+                    )}
                   </div>
                 );
               })}

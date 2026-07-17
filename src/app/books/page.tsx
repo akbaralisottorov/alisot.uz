@@ -10,7 +10,7 @@ import { useTranslation } from "@/shared/lib/i18n";
 import { Book, BookCategory } from "@/shared/types";
 
 export default function BooksPage() {
-  const { t, langPrefix } = useTranslation();
+  const { t, langPrefix, currentLang } = useTranslation();
   const [books, setBooks] = useState<Book[]>([]);
   const [categories, setCategories] = useState<BookCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,6 +89,76 @@ export default function BooksPage() {
           {t("libraryPage.desc")}
         </p>
       </FadeIn>
+
+      {/* Reading Statistics & Quotes Dashboard */}
+      {!loading && books.length > 0 && (
+        <FadeIn delay={0.05} className="grid grid-cols-1 lg:grid-cols-3 gap-[32px] mb-16">
+          {/* Stats Column */}
+          <div className="lg:col-span-1 bg-white dark:bg-card border border-border p-8 rounded-[24px] flex flex-col justify-between gap-6">
+            <h2 className="text-[10px] font-extrabold uppercase tracking-widest text-gold border-b border-border/60 pb-2">
+              {currentLang === "uz" ? "MUTOLAA STATISTIKASI" : currentLang === "en" ? "READING STATISTICS" : "СТАТИСТИКА ЧТЕНИЯ"}
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-background border border-border/80 p-4 rounded-xl text-center">
+                <span className="block font-heading text-2xl font-bold text-foreground">
+                  {books.length}
+                </span>
+                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-nowrap">
+                  {currentLang === "uz" ? "Umumiy kitob" : currentLang === "en" ? "Total Books" : "Всего книг"}
+                </span>
+              </div>
+              <div className="bg-background border border-border/80 p-4 rounded-xl text-center">
+                <span className="block font-heading text-2xl font-bold text-gold">
+                  {books.filter(b => b.status === "READING").length}
+                </span>
+                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-nowrap">
+                  {currentLang === "uz" ? "O'qilmoqda" : currentLang === "en" ? "Reading" : "Читаю"}
+                </span>
+              </div>
+              <div className="bg-background border border-border/80 p-4 rounded-xl text-center">
+                <span className="block font-heading text-2xl font-bold text-success">
+                  {books.filter(b => b.status === "COMPLETED").length}
+                </span>
+                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-nowrap">
+                  {currentLang === "uz" ? "Tugallangan" : currentLang === "en" ? "Completed" : "Прочитано"}
+                </span>
+              </div>
+              <div className="bg-background border border-border/80 p-4 rounded-xl text-center">
+                <span className="block font-heading text-2xl font-bold text-muted-foreground">
+                  {books.filter(b => b.status === "WANT_TO_READ").length}
+                </span>
+                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-nowrap">
+                  {currentLang === "uz" ? "Rejalangan" : currentLang === "en" ? "Planned" : "В планах"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Curated Quotes Column */}
+          <div className="lg:col-span-2 bg-white dark:bg-card border border-border p-8 rounded-[24px] flex flex-col justify-between gap-4 relative overflow-hidden">
+            <h2 className="text-[10px] font-extrabold uppercase tracking-widest text-gold border-b border-border/60 pb-2">
+              {currentLang === "uz" ? "SEVIMLI IQTIBOSLAR" : currentLang === "en" ? "FAVORITE QUOTES" : "ЛЮБИМЫЕ ЦИТАТЫ"}
+            </h2>
+            {books.filter(b => b.favoriteQuote).length > 0 ? (
+              <div className="space-y-4 my-auto">
+                <p className="font-sans italic text-base md:text-lg text-foreground leading-relaxed">
+                  "{books.filter(b => b.favoriteQuote)[0].favoriteQuote}"
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="w-6 h-[1px] bg-gold" />
+                  <span className="text-xs font-bold text-muted-foreground">
+                    {books.filter(b => b.favoriteQuote)[0].title} — {books.filter(b => b.favoriteQuote)[0].author}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground italic my-auto">
+                {currentLang === "uz" ? "Hozircha iqtiboslar mavjud emas." : "No quotes available."}
+              </p>
+            )}
+          </div>
+        </FadeIn>
+      )}
 
       {/* Filters and Search */}
       <FadeIn delay={0.1} className="flex flex-col md:flex-row gap-4 mb-12">

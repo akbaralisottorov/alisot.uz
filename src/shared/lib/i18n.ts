@@ -116,7 +116,27 @@ export const translations = {
       badge: "SUHBAT QURAMIZ",
       title: "Keling, choy ustida gaplashamiz.",
       desc: "Shunchaki salom demoqchimisiz, qiziqarli kitobni muhokama qilmoqchimisiz yoki bankingizda yangi g'oyalaringiz bormi? Menga istalgan vaqtda maktub yo'llang — men mazmunli suhbatlarga hamisha ochiqman.",
-      cta: "Maktub yuborish"
+      cta: "Maktub yuborish",
+      success_title: "Xabar muvaffaqiyatli yuborildi!",
+      success_desc: "Tez orada siz bilan bog'lanaman. E'tiboringiz uchun rahmat!",
+      close: "Yopish",
+      name_label: "Ismingiz",
+      name_placeholder: "Ismingizni kiriting",
+      email_label: "Pochtangiz",
+      email_placeholder: "email@example.com",
+      subject_label: "Mavzu",
+      subject_placeholder: "Xabar mavzusi",
+      message_label: "Xabaringiz",
+      message_placeholder: "Xabaringiz matnini kiriting...",
+      error_generic: "Tizimda xatolik. Keyinroq qayta urinib ko'ring."
+    },
+    writing: {
+      badge: "ESSELAR VA TAHLILLAR",
+      title: "Mualliflik maqolalari",
+      desc: "Marketing, moliya, xulq-atvor iqtisodiyoti va psixologiya masalalari bo'yicha tahlillar.",
+      cta: "O'qish",
+      db_error: "Ma'lumotlar bazasiga ulanishda xatolik:",
+      empty: "Hozircha maqolalar chop etilmagan."
     },
     newsletter: {
       badge: "BEYSLETTER (XABARNOMA)",
@@ -267,7 +287,27 @@ export const translations = {
       badge: "LET'S TALK",
       title: "Let's talk over tea.",
       desc: "Want to say hello, discuss a book, or share a new idea? Drop me a message — I'm always open to meaningful conversations.",
-      cta: "Send Message"
+      cta: "Send Message",
+      success_title: "Message sent successfully!",
+      success_desc: "I will contact you shortly. Thank you for your interest!",
+      close: "Close",
+      name_label: "Your Name",
+      name_placeholder: "Enter your name",
+      email_label: "Your Email",
+      email_placeholder: "email@example.com",
+      subject_label: "Subject",
+      subject_placeholder: "Message subject",
+      message_label: "Your Message",
+      message_placeholder: "Enter your message text...",
+      error_generic: "System error. Please try again later."
+    },
+    writing: {
+      badge: "ESSAYS & ANALYSIS",
+      title: "Author Essays",
+      desc: "Analysis on marketing, finance, behavioral economics and psychology.",
+      cta: "Read",
+      db_error: "Database connection error:",
+      empty: "No articles published yet."
     },
     newsletter: {
       badge: "NEWSLETTER",
@@ -418,7 +458,27 @@ export const translations = {
       badge: "ПООБЩАЕМСЯ",
       title: "Давай пообщаемся за чаем.",
       desc: "Хотите сказать «привет», обсудить книгу или поделиться новой идеей? Напишите мне в любое время — я всегда открыт для содержательных разговоров.",
-      cta: "Отправить сообщение"
+      cta: "Отправить сообщение",
+      success_title: "Сообщение успешно отправлено!",
+      success_desc: "Я свяжусь с вами в ближайшее время. Спасибо за ваш интерес!",
+      close: "Закрыть",
+      name_label: "Ваше имя",
+      name_placeholder: "Введите ваше имя",
+      email_label: "Ваша почта",
+      email_placeholder: "email@example.com",
+      subject_label: "Тема",
+      subject_placeholder: "Тема сообщения",
+      message_label: "Ваше сообщение",
+      message_placeholder: "Введите текст вашего сообщения...",
+      error_generic: "Системная ошибка. Пожалуйста, попробуйте позже."
+    },
+    writing: {
+      badge: "ЭССЕ И АНАЛИТИКА",
+      title: "Авторские статьи",
+      desc: "Анализ вопросов маркетинга, финансов, поведенческой экономики и психологии.",
+      cta: "Читать",
+      db_error: "Ошибка подключения к базе данных:",
+      empty: "Статьи еще не опубликованы."
     },
     newsletter: {
       badge: "РАССЫЛКА",
@@ -472,27 +532,27 @@ export function useTranslation() {
     }
   }
   
-  const t = (path: string): any => {
+  const t = (path: string): string => {
     const parts = path.split(".");
-    let result: any = translations[currentLang];
+    let result: unknown = translations[currentLang];
     
     for (const part of parts) {
-      if (result && typeof result === "object" && part in result) {
-        result = result[part];
+      if (result && typeof result === "object" && part in (result as Record<string, unknown>)) {
+        result = (result as Record<string, unknown>)[part];
       } else {
         // Fallback to Uzbek if translation path is missing
-        let uzFallback: any = translations.uz;
+        let uzFallback: unknown = translations.uz;
         for (const fallbackPart of parts) {
-          if (uzFallback && typeof uzFallback === "object" && fallbackPart in uzFallback) {
-            uzFallback = uzFallback[fallbackPart];
+          if (uzFallback && typeof uzFallback === "object" && fallbackPart in (uzFallback as Record<string, unknown>)) {
+            uzFallback = (uzFallback as Record<string, unknown>)[fallbackPart];
           } else {
             return path;
           }
         }
-        return uzFallback;
+        return typeof uzFallback === "string" ? uzFallback : path;
       }
     }
-    return result;
+    return typeof result === "string" ? result : path;
   };
 
   return { t, currentLang, langPrefix: currentLang === "uz" ? "" : `/${currentLang}` };
