@@ -1,27 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
+import { Button } from "@/shared/ui/button";
+import { Badge } from "@/shared/ui/badge";
 import { Plus, Edit, Trash2, ArrowLeft, BarChart3, FileText, Users, Shield, RefreshCw } from "lucide-react";
 import ArticleForm from "./ArticleForm";
-import { AnalyticsDashboard } from "@/components/analytics-dashboard";
-import { API_ROUTES, ArticleStatus } from "@/lib/constants";
-
-interface Article {
-  id: string;
-  title: string;
-  slug: string;
-  status: ArticleStatus;
-  featured: boolean;
-  createdAt: string;
-  authorId: string;
-  excerpt?: string;
-  content?: string;
-  coverImage?: string;
-  seoTitle?: string;
-  seoDescription?: string;
-}
+import { AnalyticsDashboard } from "@/features/analytics/analytics-dashboard";
+import { API_ROUTES, ArticleStatus } from "@/shared/constants";
+import { Article, Subscriber } from "@/shared/types";
 
 
 export default function AdminDashboard() {
@@ -34,7 +20,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"content" | "analytics" | "subscribers" | "security">("analytics");
-  const [subscribers, setSubscribers] = useState<any[]>([]);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loadingSubs, setLoadingSubs] = useState(false);
   const [subQuery, setSubQuery] = useState("");
   

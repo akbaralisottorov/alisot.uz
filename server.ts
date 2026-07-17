@@ -10,8 +10,10 @@ import { Feed } from "feed";
 
 import { BookRepository, BookCategoryRepository } from "./src/repositories/bookRepository.js";
 import { GardenRepository } from "./src/repositories/gardenRepository.js";
+import { IdeaRepository } from "./src/repositories/ideaRepository.js";
+import { LearningRepository } from "./src/repositories/learningRepository.js";
 
-import { getEmbedding } from "./src/lib/openai.js";
+import { getEmbedding } from "./src/shared/lib/openai.js";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
@@ -960,6 +962,372 @@ app.delete("/api/admin/garden/:id", async (req, res) => {
   } catch (e: any) {
     console.log("Error:", e?.message || e);
     res.status(500).json({ error: "Failed to delete garden note", details: e.message || String(e) });
+  }
+});
+
+// --- Idea Routes ---
+
+app.get("/api/ideas", async (req, res) => {
+  try {
+    const ideas = await IdeaRepository.getIdeas();
+    res.json(ideas);
+  } catch (e: any) {
+    res.status(500).json({ error: "Failed to fetch ideas", details: e.message || String(e) });
+  }
+});
+
+app.post("/api/admin/ideas", async (req, res) => {
+  try {
+    const data = req.body;
+    const newIdea = await IdeaRepository.createIdea(data);
+    res.json(newIdea);
+  } catch (e: any) {
+    res.status(500).json({ error: "Failed to create idea", details: e.message || String(e) });
+  }
+});
+
+app.put("/api/admin/ideas/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+    const updated = await IdeaRepository.updateIdea(id, data);
+    res.json(updated);
+  } catch (e: any) {
+    res.status(500).json({ error: "Failed to update idea", details: e.message || String(e) });
+  }
+});
+
+app.delete("/api/admin/ideas/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await IdeaRepository.deleteIdea(id);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(500).json({ error: "Failed to delete idea", details: e.message || String(e) });
+  }
+});
+
+// --- Learning Routes ---
+
+app.get("/api/learning", async (req, res) => {
+  try {
+    const { category } = req.query;
+    const nodes = category 
+      ? await LearningRepository.getLearningNodesByCategory(category as string)
+      : await LearningRepository.getLearningNodes();
+    res.json(nodes);
+  } catch (e: any) {
+    res.status(500).json({ error: "Failed to fetch learning nodes", details: e.message || String(e) });
+  }
+});
+
+app.post("/api/admin/learning", async (req, res) => {
+  try {
+    const data = req.body;
+    const newNode = await LearningRepository.createLearningNode(data);
+    res.json(newNode);
+  } catch (e: any) {
+    res.status(500).json({ error: "Failed to create learning node", details: e.message || String(e) });
+  }
+});
+
+app.put("/api/admin/learning/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+    const updated = await LearningRepository.updateLearningNode(id, data);
+    res.json(updated);
+  } catch (e: any) {
+    res.status(500).json({ error: "Failed to update learning node", details: e.message || String(e) });
+  }
+});
+
+app.delete("/api/admin/learning/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await LearningRepository.deleteLearningNode(id);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(500).json({ error: "Failed to delete learning node", details: e.message || String(e) });
+  }
+});
+
+// --- SEO & Syndication Routes ---
+
+app.get("/robots.txt", (req, res) => {
+  res.type("text/plain");
+  res.send(`User-agent: *
+Allow: /
+Sitemap: https://alisot.uz/sitemap.xml
+`);
+});
+
+app.get("/sitemap.xml", async (req, res) => {
+  res.header("Content-Type", "application/xml");
+  try {
+    const articles = await ArticleRepository.getPublishedArticles() || [];
+    const books = await BookRepository.getBooks({}) || [];
+    const notes = await GardenRepository.getNotes({}) || [];
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://alisot.uz/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://alisot.uz/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://alisot.uz/projects</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://alisot.uz/books</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://alisot.uz/garden</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://alisot.uz/now</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://alisot.uz/timeline</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://alisot.uz/uses</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`;
+
+    articles.forEach(art => {
+      xml += `
+  <url>
+    <loc>https://alisot.uz/article/${art.slug}</loc>
+    <lastmod>${new Date(art.updatedAt || art.createdAt).toISOString().split('T')[0]}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+    });
+
+    books.forEach(b => {
+      xml += `
+  <url>
+    <loc>https://alisot.uz/books/${b.slug}</loc>
+    <lastmod>${new Date(b.updatedAt || b.createdAt).toISOString().split('T')[0]}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`;
+    });
+
+    notes.forEach(n => {
+      xml += `
+  <url>
+    <loc>https://alisot.uz/garden/${n.slug}</loc>
+    <lastmod>${new Date(n.updatedAt || n.createdAt).toISOString().split('T')[0]}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>`;
+    });
+
+    xml += `
+</urlset>`;
+    res.send(xml);
+  } catch (e: any) {
+    console.error("Sitemap error:", e);
+    res.status(500).send("Error generating sitemap");
+  }
+});
+
+app.get("/feed.xml", async (req, res) => {
+  res.header("Content-Type", "application/xml");
+  try {
+    const articles = await ArticleRepository.getPublishedArticles() || [];
+    const latestDate = articles.length > 0 ? new Date(articles[0].createdAt) : new Date();
+
+    let xml = `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Akbarali Sottorov Blog</title>
+    <link>https://alisot.uz</link>
+    <description>Marketing strategy, brand communications, and behavioral economics insights.</description>
+    <language>uz</language>
+    <lastBuildDate>${latestDate.toUTCString()}</lastBuildDate>
+    <atom:link href="https://alisot.uz/feed.xml" rel="self" type="application/rss+xml" />`;
+
+    articles.forEach(art => {
+      xml += `
+    <item>
+      <title><![CDATA[${art.title}]]></title>
+      <link>https://alisot.uz/article/${art.slug}</link>
+      <description><![CDATA[${art.excerpt || ""}]]></description>
+      <pubDate>${new Date(art.createdAt).toUTCString()}</pubDate>
+      <guid>https://alisot.uz/article/${art.slug}</guid>
+    </item>`;
+    });
+
+    xml += `
+  </channel>
+</rss>`;
+    res.send(xml);
+  } catch (e: any) {
+    console.error("RSS error:", e);
+    res.status(500).send("Error generating feed");
+  }
+});
+
+app.get("/feed/articles.xml", async (req, res) => {
+  res.header("Content-Type", "application/xml");
+  try {
+    const articles = await ArticleRepository.getPublishedArticles() || [];
+    const latestDate = articles.length > 0 ? new Date(articles[0].createdAt) : new Date();
+
+    let xml = `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Akbarali Sottorov — Essays Feed</title>
+    <link>https://alisot.uz</link>
+    <description>Deep essays and tahlillar on marketing, design, and economics.</description>
+    <language>uz</language>
+    <lastBuildDate>${latestDate.toUTCString()}</lastBuildDate>
+    <atom:link href="https://alisot.uz/feed/articles.xml" rel="self" type="application/rss+xml" />`;
+
+    articles.forEach(art => {
+      xml += `
+    <item>
+      <title><![CDATA[${art.title}]]></title>
+      <link>https://alisot.uz/article/${art.slug}</link>
+      <description><![CDATA[${art.excerpt || ""}]]></description>
+      <pubDate>${new Date(art.createdAt).toUTCString()}</pubDate>
+      <guid>https://alisot.uz/article/${art.slug}</guid>
+    </item>`;
+    });
+
+    xml += `
+  </channel>
+</rss>`;
+    res.send(xml);
+  } catch (e: any) {
+    res.status(500).send("Error generating articles feed");
+  }
+});
+
+app.get("/feed/notes.xml", async (req, res) => {
+  res.header("Content-Type", "application/xml");
+  try {
+    const notes = await GardenRepository.getNotes({}) || [];
+    const latestDate = notes.length > 0 ? new Date(notes[0].updatedAt || notes[0].createdAt) : new Date();
+
+    let xml = `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Akbarali Sottorov — Digital Garden Notes Feed</title>
+    <link>https://alisot.uz</link>
+    <description>Evolving ideas, raw notes, and cognitive research links.</description>
+    <language>uz</language>
+    <lastBuildDate>${latestDate.toUTCString()}</lastBuildDate>
+    <atom:link href="https://alisot.uz/feed/notes.xml" rel="self" type="application/rss+xml" />`;
+
+    notes.forEach(note => {
+      xml += `
+    <item>
+      <title><![CDATA[${note.title}]]></title>
+      <link>https://alisot.uz/garden/${note.slug}</link>
+      <description><![CDATA[${note.content.substring(0, 150)}...]]></description>
+      <pubDate>${new Date(note.createdAt).toUTCString()}</pubDate>
+      <guid>https://alisot.uz/garden/${note.slug}</guid>
+    </item>`;
+    });
+
+    xml += `
+  </channel>
+</rss>`;
+    res.send(xml);
+  } catch (e: any) {
+    res.status(500).send("Error generating notes feed");
+  }
+});
+
+app.get("/feed/projects.xml", async (req, res) => {
+  res.header("Content-Type", "application/xml");
+  try {
+    // We import project data from static module directly since we don't have custom DB records seeded yet
+    const { getLocalizedProjectsData } = await import("./src/shared/data/projects.js");
+    const projects = getLocalizedProjectsData("uz");
+
+    let xml = `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Akbarali Sottorov — Projects Case Studies Feed</title>
+    <link>https://alisot.uz</link>
+    <description>Product builds, technical architectures, and software engineering case studies.</description>
+    <language>uz</language>
+    <atom:link href="https://alisot.uz/feed/projects.xml" rel="self" type="application/rss+xml" />`;
+
+    projects.forEach(p => {
+      xml += `
+    <item>
+      <title><![CDATA[${p.title}]]></title>
+      <link>https://alisot.uz/projects/${p.slug}</link>
+      <description><![CDATA[${p.motivation}]]></description>
+      <guid>https://alisot.uz/projects/${p.slug}</guid>
+    </item>`;
+    });
+
+    xml += `
+  </channel>
+</rss>`;
+    res.send(xml);
+  } catch (e: any) {
+    res.status(500).send("Error generating projects feed");
+  }
+});
+
+app.get("/feed/reading.xml", async (req, res) => {
+  res.header("Content-Type", "application/xml");
+  try {
+    const books = await BookRepository.getBooks({}) || [];
+    const latestDate = books.length > 0 ? new Date(books[0].updatedAt || books[0].createdAt) : new Date();
+
+    let xml = `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Akbarali Sottorov — Reading Log Feed</title>
+    <link>https://alisot.uz</link>
+    <description>MUTOLAA: Bookshelf, summaries, and ratings.</description>
+    <language>uz</language>
+    <lastBuildDate>${latestDate.toUTCString()}</lastBuildDate>
+    <atom:link href="https://alisot.uz/feed/reading.xml" rel="self" type="application/rss+xml" />`;
+
+    books.forEach(b => {
+      xml += `
+    <item>
+      <title><![CDATA[${b.title}]]></title>
+      <link>https://alisot.uz/books/${b.slug}</link>
+      <description><![CDATA[${b.summary || ""} - Rating: ${b.rating}/5]]></description>
+      <pubDate>${new Date(b.createdAt).toUTCString()}</pubDate>
+      <guid>https://alisot.uz/books/${b.slug}</guid>
+    </item>`;
+    });
+
+    xml += `
+  </channel>
+</rss>`;
+    res.send(xml);
+  } catch (e: any) {
+    res.status(500).send("Error generating reading feed");
   }
 });
 

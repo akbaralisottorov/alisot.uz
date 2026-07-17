@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useTranslation, translations } from '../lib/i18n';
+import { useTranslation, translations } from '../shared/lib/i18n';
 
 // Mock react-router-dom hooks
 vi.mock('react-router-dom', () => ({

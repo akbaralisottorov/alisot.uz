@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Textarea } from "@/shared/ui/textarea";
+import { Checkbox } from "@/shared/ui/checkbox";
+import { Label } from "@/shared/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/ui/select";
 import { Save, AlertCircle } from "lucide-react";
-import RichEditor from "@/components/RichEditor";
-import { API_ROUTES, ArticleStatus } from "@/lib/constants";
+import RichEditor from "@/features/editor/RichEditor";
+import { API_ROUTES, ArticleStatus } from "@/shared/constants";
 
 // ─── Interfaces ──────────────────────────────────────────────────────────────
 
